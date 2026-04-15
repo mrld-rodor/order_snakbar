@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} | {{ app_name }}</title>
+    <style>
+        :root {
+            --bg: #f6efe7;
+            --panel: rgba(255, 251, 247, 0.94);
+            --text: #2d231e;
+            --muted: #6d5b50;
+            --accent: #9f5d34;
+            --border: #e1d0c0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                linear-gradient(160deg, rgba(159, 93, 52, 0.12), transparent 35%),
+                var(--bg);
+            font-family: "Segoe UI", sans-serif;
+            color: var(--text);
+        }
+
+        .shell {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 2rem 1.2rem 3rem;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 1.5rem;
+            box-shadow: 0 22px 55px rgba(78, 52, 37, 0.08);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .period-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .metric {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1rem;
+            background: #fff;
+        }
+
+        .section-title {
+            margin-top: 1.8rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .list {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .list-item {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1rem;
+            background: #fff;
+        }
+
+        .list-item strong {
+            display: block;
+            margin-bottom: 0.35rem;
+        }
+
+        .label {
+            color: var(--muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .value {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        button {
+            border: 0;
+            border-radius: 999px;
+            padding: 0.8rem 1rem;
+            font: inherit;
+            font-weight: 700;
+            color: white;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        pre {
+            overflow: auto;
+            padding: 1rem;
+            border-radius: 16px;
+            background: #2b211c;
+            color: #f5e8db;
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <div class="topbar">
+            <div>
+                <p>{{ app_name }}</p>
+                <h1>{{ page_title }}</h1>
+            </div>
+            <button id="logout-button" type="button">Sair</button>
+        </div>
+
+        <section class="card">
+            <p>Esta tela valida o token JWT no frontend e consulta uma area protegida do backend.</p>
+
+            <div class="grid">
+                <div class="metric">
+                    <div class="label">Usuario</div>
+                    <div id="user-name" class="value">Carregando...</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Email</div>
+                    <div id="user-email" class="value">Carregando...</div>
+                </div>
+                <div class="metric">
+                    <div class="label">Perfil</div>
+                    <div id="user-role" class="value">Carregando...</div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Indicadores</h2>
+            <div id="overview-grid" class="period-grid"></div>
+
+            <h2 class="section-title">Itens complementares</h2>
+            <div id="secondary-grid" class="grid"></div>
+
+            <h2 class="section-title">Ultimos pedidos</h2>
+            <div id="recent-orders" class="list"></div>
+
+            <h2 class="section-title">Resposta tecnica</h2>
+            <pre id="protected-response">Carregando...</pre>
+        </section>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('access_token');
+        const expectedRole = '{{ expected_role }}';
+        const protectedEndpoint = '{{ api_endpoint }}';
+
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        document.getElementById('logout-button').addEventListener('click', () => {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('auth_user');
+            window.location.href = '/login';
+        });
+
+        function currency(value) {
+            return new Intl.NumberFormat('pt-PT', {
+                style: 'currency',
+                currency: 'EUR',
+            }).format(value || 0);
+        }
+
+        function renderOverview(overview) {
+            const container = document.getElementById('overview-grid');
+            container.innerHTML = '';
+
+            ['day', 'week', 'month'].forEach((periodKey) => {
+                const item = overview?.[periodKey];
+                if (!item) {
+                    return;
+                }
+
+                const labelMap = {
+                    day: 'Dia',
+                    week: 'Semana',
+                    month: 'Mes',
+                };
+
+                const card = document.createElement('div');
+                card.className = 'metric';
+                card.innerHTML = `
+                    <div class="label">${labelMap[periodKey]}</div>
+                    <div class="value">${currency(item.sales_total)}</div>
+                    <div class="label">Pedidos pagos: ${item.orders_paid}</div>
+                    <div class="label">Ticket medio: ${currency(item.avg_ticket)}</div>
+                    <div class="label">Itens vendidos: ${item.items_sold}</div>
+                    <div class="label">Itens vegan vendidos: ${item.vegan_items_sold}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderSecondary(data) {
+            const container = document.getElementById('secondary-grid');
+            container.innerHTML = '';
+
+            if (data.catalog) {
+                const catalog = document.createElement('div');
+                catalog.className = 'metric';
+                catalog.innerHTML = `
+                    <div class="label">Catalogo ativo</div>
+                    <div class="value">${data.catalog.product_count} produtos</div>
+                    <div class="label">Categorias: ${data.catalog.category_count}</div>
+                    <div class="label">Opcoes vegan: ${data.catalog.vegan_product_count}</div>
+                `;
+                container.appendChild(catalog);
+            }
+
+            if (Array.isArray(data.collaborators) && data.collaborators.length) {
+                const leader = data.collaborators[0];
+                const ranking = document.createElement('div');
+                ranking.className = 'metric';
+                ranking.innerHTML = `
+                    <div class="label">Melhor desempenho no mes</div>
+                    <div class="value">${leader.collaborator.name}</div>
+                    <div class="label">Vendas: ${currency(leader.sales_total)}</div>
+                    <div class="label">Pedidos: ${leader.orders_paid}</div>
+                `;
+                container.appendChild(ranking);
+            }
+
+            const monthOverview = data.overview?.month;
+            if (monthOverview?.top_products?.length) {
+                const topProduct = monthOverview.top_products[0];
+                const products = document.createElement('div');
+                products.className = 'metric';
+                products.innerHTML = `
+                    <div class="label">Produto com maior giro</div>
+                    <div class="value">${topProduct.product}</div>
+                    <div class="label">Quantidade: ${topProduct.quantity}</div>
+                    <div class="label">Receita: ${currency(topProduct.revenue)}</div>
+                `;
+                container.appendChild(products);
+            }
+        }
+
+        function renderRecentOrders(orders) {
+            const container = document.getElementById('recent-orders');
+            container.innerHTML = '';
+
+            if (!orders?.length) {
+                container.innerHTML = '<div class="list-item">Nenhum pedido encontrado para o contexto atual.</div>';
+                return;
+            }
+
+            orders.forEach((order) => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                const items = order.items.map((entry) => `${entry.quantity}x ${entry.name}`).join(', ');
+                item.innerHTML = `
+                    <strong>Pedido #${order.id} | Mesa ${order.table_number} | ${order.status}</strong>
+                    <div>Total: ${currency(order.total)}</div>
+                    <div>Colaborador: ${order.collaborator || 'Nao atribuido'}</div>
+                    <div>Itens: ${items || 'Sem itens'}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        async function loadDashboard() {
+            const meResponse = await fetch('/api/auth/me', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!meResponse.ok) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('auth_user');
+                window.location.href = '/login';
+                return;
+            }
+
+            const meData = await meResponse.json();
+            const user = meData.user;
+
+            if (expectedRole === 'administrador' && user.role !== 'administrador') {
+                window.location.href = '/colaborador';
+                return;
+            }
+
+            if (expectedRole === 'colaborador' && !['colaborador', 'administrador'].includes(user.role)) {
+                window.location.href = '/login';
+                return;
+            }
+
+            document.getElementById('user-name').textContent = user.name;
+            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('user-role').textContent = user.role;
+
+            const areaResponse = await fetch(protectedEndpoint, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const areaData = await areaResponse.json();
+            renderOverview(areaData.overview);
+            renderSecondary(areaData);
+            renderRecentOrders(areaData.recent_orders);
+            document.getElementById('protected-response').textContent = JSON.stringify(areaData, null, 2);
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | {{ app_name }}</title>
+    <style>
+        :root {
+            --bg: #f4eadf;
+            --panel: rgba(255, 250, 244, 0.95);
+            --text: #2f241f;
+            --muted: #6f5d52;
+            --accent: #8c4f2b;
+            --accent-dark: #6d3a1d;
+            --danger: #a3362c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background:
+                radial-gradient(circle at top left, rgba(140, 79, 43, 0.16), transparent 30%),
+                linear-gradient(135deg, #f7f1e8 0%, #e8d5bf 100%);
+            font-family: "Segoe UI", sans-serif;
+            color: var(--text);
+        }
+
+        .card {
+            width: min(100%, 430px);
+            margin: 1.5rem;
+            padding: 2rem;
+            border-radius: 24px;
+            background: var(--panel);
+            box-shadow: 0 24px 60px rgba(57, 33, 19, 0.14);
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        form {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        label {
+            display: grid;
+            gap: 0.4rem;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 1px solid #d9c4b1;
+            border-radius: 12px;
+            font: inherit;
+            background: #fff;
+        }
+
+        button {
+            border: 0;
+            border-radius: 999px;
+            padding: 0.95rem 1.2rem;
+            font: inherit;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            cursor: pointer;
+        }
+
+        .helper {
+            margin-top: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .message {
+            min-height: 1.5rem;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        .message.error {
+            color: var(--danger);
+        }
+
+        .message.success {
+            color: #25643b;
+        }
+    </style>
+</head>
+<body>
+    <section class="card">
+        <p>Sistema de autenticacao inicial</p>
+        <h1>Entrar no {{ app_name }}</h1>
+        <p>Use as credenciais configuradas no arquivo <strong>.env</strong>. Os usuarios sao persistidos automaticamente no banco na primeira execucao.</p>
+
+        <form id="login-form">
+            <label>
+                Email
+                <input id="email" name="email" type="email" autocomplete="username" required>
+            </label>
+
+            <label>
+                Senha
+                <input id="password" name="password" type="password" autocomplete="current-password" required>
+            </label>
+
+            <button type="submit">Entrar</button>
+        </form>
+
+        <div id="message" class="message"></div>
+        <p class="helper">Perfis suportados nesta etapa: <strong>colaborador</strong> e <strong>administrador</strong>. O sistema ja nasce com catalogo, colaboradores e historico comercial de demonstracao.</p>
+    </section>
+
+    <script>
+        const form = document.getElementById('login-form');
+        const message = document.getElementById('message');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            message.textContent = '';
+            message.className = 'message';
+
+            const payload = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+            };
+
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                message.textContent = data.message || 'Falha ao autenticar.';
+                message.classList.add('error');
+                return;
+            }
+
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('auth_user', JSON.stringify(data.user));
+            message.textContent = `Login realizado como ${data.user.role}.`;
+            message.classList.add('success');
+
+            window.location.href = data.user.role === 'administrador' ? '/admin' : '/colaborador';
+        });
+    </script>
+</body>
+</html>

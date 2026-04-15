@@ -1,0 +1,53 @@
+import os
+from datetime import timedelta
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+class BaseConfig:
+    APP_NAME = os.getenv("APP_NAME", "order_snakbar")
+    SECRET_KEY = os.getenv(
+        "SECRET_KEY", "dev-secret-key-change-me-with-32-chars"
+    )
+    JWT_SECRET_KEY = os.getenv(
+        "JWT_SECRET_KEY", "dev-jwt-secret-key-change-me-with-32-chars"
+    )
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(
+        hours=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES_HOURS", "8"))
+    )
+    JSON_SORT_KEYS = False
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///order_snakbar.db")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    DEMO_SEED_ENABLED = os.getenv("DEMO_SEED_ENABLED", "true").lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    DEFAULT_ADMIN_NAME = os.getenv("ADMIN_NAME", "Administrador")
+    DEFAULT_ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@cafeteria.local")
+    DEFAULT_ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
+    DEFAULT_COLLABORATOR_NAME = os.getenv("COLLABORATOR_NAME", "Colaborador")
+    DEFAULT_COLLABORATOR_EMAIL = os.getenv(
+        "COLLABORATOR_EMAIL", "colaborador@cafeteria.local"
+    )
+    DEFAULT_COLLABORATOR_PASSWORD = os.getenv(
+        "COLLABORATOR_PASSWORD", "colaborador123"
+    )
+
+
+class DevelopmentConfig(BaseConfig):
+    DEBUG = True
+
+
+class ProductionConfig(BaseConfig):
+    DEBUG = False
+
+
+def get_config():
+    environment = os.getenv("FLASK_ENV", "development").lower()
+    if environment == "production":
+        return ProductionConfig
+    return DevelopmentConfig

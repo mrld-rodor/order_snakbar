@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }}</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #f7f1e8 0%, #eadbc8 100%);
+            color: #2f241f;
+        }
+        main {
+            max-width: 720px;
+            margin: 6rem auto;
+            padding: 2rem;
+            background: rgba(255, 252, 247, 0.92);
+            border-radius: 20px;
+            box-shadow: 0 24px 60px rgba(70, 45, 30, 0.12);
+        }
+        a {
+            color: #7a4b2f;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>{{ app_name }}</h1>
+        <p>Base inicial do sistema integrado de gestao para cafeteria com autenticacao, catalogo e banco de dados operacional.</p>
+        <p>Endpoint de verificacao: <a href="/api/health">/api/health</a></p>
+        <p>Fluxo inicial de autenticacao: <a href="/login">/login</a></p>
+        <p>Catalogo seed do cardapio: <a href="/api/catalog/menu">/api/catalog/menu</a></p>
+    </main>
+</body>
+</html>
