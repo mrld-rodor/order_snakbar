@@ -77,8 +77,11 @@ class MenuProduct(db.Model):
     slug = db.Column(db.String(120), nullable=False, unique=True, index=True)
     description = db.Column(db.String(255), nullable=False)
     price = db.Column(db.Numeric(10, 2), nullable=False, default=Decimal("0.00"))
+    stock_quantity = db.Column(db.Integer, nullable=False, default=0)
+    low_stock_threshold = db.Column(db.Integer, nullable=False, default=5)
     is_vegan = db.Column(db.Boolean, nullable=False, default=False)
     active = db.Column(db.Boolean, nullable=False, default=True)
+    image_filename = db.Column(db.String(255))
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
 
     category = db.relationship("MenuCategory", back_populates="products")
@@ -88,14 +91,28 @@ class MenuProduct(db.Model):
         return {
             "id": self.id,
             "category_id": self.category_id,
+            "category_slug": self.category.slug if self.category else None,
             "category": self.category.name if self.category else None,
             "name": self.name,
             "slug": self.slug,
             "description": self.description,
             "price": float(self.price),
+            "stock_quantity": self.stock_quantity,
+            "low_stock_threshold": self.low_stock_threshold,
+            "stock_status": self.stock_status,
             "is_vegan": self.is_vegan,
             "active": self.active,
+            "image_filename": self.image_filename,
+            "image_url": f"/static/uploads/products/{self.image_filename}" if self.image_filename else None,
         }
+
+    @property
+    def stock_status(self):
+        if self.stock_quantity <= 0:
+            return "out_of_stock"
+        if self.stock_quantity <= self.low_stock_threshold:
+            return "low_stock"
+        return "healthy"
 
 
 class DiningTable(db.Model):

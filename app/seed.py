@@ -52,6 +52,8 @@ MENU_PRODUCTS = [
         "slug": "espresso-classico",
         "description": "Cafe curto com torra media e finalizacao intensa.",
         "price": Decimal("1.80"),
+        "stock_quantity": 120,
+        "low_stock_threshold": 25,
         "is_vegan": False,
     },
     {
@@ -60,6 +62,8 @@ MENU_PRODUCTS = [
         "slug": "cappuccino-cremoso",
         "description": "Mistura de espresso, leite vaporizado e canela.",
         "price": Decimal("3.20"),
+        "stock_quantity": 54,
+        "low_stock_threshold": 12,
         "is_vegan": False,
     },
     {
@@ -68,6 +72,8 @@ MENU_PRODUCTS = [
         "slug": "latte-baunilha",
         "description": "Cafe suave com leite texturizado e notas de baunilha.",
         "price": Decimal("3.80"),
+        "stock_quantity": 40,
+        "low_stock_threshold": 10,
         "is_vegan": False,
     },
     {
@@ -76,6 +82,8 @@ MENU_PRODUCTS = [
         "slug": "mocha-gelado",
         "description": "Bebida fria de chocolate e espresso para dias de maior fluxo.",
         "price": Decimal("4.40"),
+        "stock_quantity": 18,
+        "low_stock_threshold": 8,
         "is_vegan": False,
     },
     {
@@ -84,6 +92,8 @@ MENU_PRODUCTS = [
         "slug": "sumo-laranja",
         "description": "Laranja espremida na hora, servida sem adicao de acucar.",
         "price": Decimal("3.10"),
+        "stock_quantity": 22,
+        "low_stock_threshold": 8,
         "is_vegan": False,
     },
     {
@@ -92,6 +102,8 @@ MENU_PRODUCTS = [
         "slug": "sumo-verde-detox",
         "description": "Abacaxi, couve, maca verde e hortela.",
         "price": Decimal("3.90"),
+        "stock_quantity": 14,
+        "low_stock_threshold": 6,
         "is_vegan": True,
     },
     {
@@ -100,6 +112,8 @@ MENU_PRODUCTS = [
         "slug": "iced-tea-limao",
         "description": "Cha preto artesanal com limao siciliano e gelo.",
         "price": Decimal("2.90"),
+        "stock_quantity": 26,
+        "low_stock_threshold": 10,
         "is_vegan": True,
     },
     {
@@ -108,6 +122,8 @@ MENU_PRODUCTS = [
         "slug": "iced-tea-pessego",
         "description": "Cha gelado com pessego e toque citrico.",
         "price": Decimal("3.20"),
+        "stock_quantity": 6,
+        "low_stock_threshold": 6,
         "is_vegan": False,
     },
     {
@@ -116,6 +132,8 @@ MENU_PRODUCTS = [
         "slug": "croissant-misto",
         "description": "Croissant prensado com queijo e fiambre.",
         "price": Decimal("4.80"),
+        "stock_quantity": 15,
+        "low_stock_threshold": 5,
         "is_vegan": False,
     },
     {
@@ -124,6 +142,8 @@ MENU_PRODUCTS = [
         "slug": "tosta-frango",
         "description": "Tosta rustica com frango desfiado e creme leve.",
         "price": Decimal("5.60"),
+        "stock_quantity": 11,
+        "low_stock_threshold": 5,
         "is_vegan": False,
     },
     {
@@ -132,6 +152,8 @@ MENU_PRODUCTS = [
         "slug": "wrap-falafel",
         "description": "Wrap vegan com falafel, hummus e salada fresca.",
         "price": Decimal("6.20"),
+        "stock_quantity": 9,
+        "low_stock_threshold": 4,
         "is_vegan": True,
     },
     {
@@ -140,6 +162,8 @@ MENU_PRODUCTS = [
         "slug": "bowl-grao-abacate",
         "description": "Bowl vegan rico em proteina vegetal e fibras.",
         "price": Decimal("7.10"),
+        "stock_quantity": 4,
+        "low_stock_threshold": 4,
         "is_vegan": True,
     },
     {
@@ -148,6 +172,8 @@ MENU_PRODUCTS = [
         "slug": "cheesecake-frutos-vermelhos",
         "description": "Sobremesa de vitrine com boa margem e saida constante.",
         "price": Decimal("4.60"),
+        "stock_quantity": 7,
+        "low_stock_threshold": 6,
         "is_vegan": False,
     },
 ]
@@ -231,6 +257,14 @@ def _ensure_products():
             payload = dict(item)
             category = categories[payload.pop("category_slug")]
             db.session.add(MenuProduct(category=category, **payload))
+        else:
+            product.category = categories[item["category_slug"]]
+            product.name = item["name"]
+            product.description = item["description"]
+            product.price = item["price"]
+            product.stock_quantity = item["stock_quantity"]
+            product.low_stock_threshold = item["low_stock_threshold"]
+            product.is_vegan = item["is_vegan"]
 
 
 def _ensure_tables():

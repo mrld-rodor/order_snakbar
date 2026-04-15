@@ -75,6 +75,42 @@ Recursos incluidos nesta etapa:
 - ranking de produtividade e vendas por colaborador;
 - dashboards com dados reais do banco.
 
+## CRUD administrativo de produtos
+
+O painel do administrador agora permite gerir integralmente os produtos do cardapio, incluindo comidas e bebidas.
+
+Recursos incluidos:
+
+- introduzir produtos com categoria, descricao, preco e indicador vegan;
+- editar produtos existentes;
+- apagar produtos sem historico de vendas;
+- desativar produtos com historico, preservando integridade analitica;
+- carregar imagens por upload no painel admin;
+- gerir estoque atual e limite minimo por produto;
+- armazenar a imagem do produto em `app/static/uploads/products/`.
+
+## Paineis administrativos separados
+
+O modulo administrativo foi dividido em paineis especializados:
+
+- `/admin/produtos`: estatisticas de produtos, vendas, giro e estoque;
+- `/admin/colaboradores`: produtividade e atividade por colaborador, com filtro dinamico;
+- `/admin/catalogo`: CRUD operacional do catalogo com gestao de imagens e estoque.
+
+Os paineis analiticos fazem atualizacao periodica por requisicoes ao backend para manter a leitura proxima do tempo real.
+
+## Painel operacional do colaborador
+
+O painel do colaborador passou a funcionar como ponto inicial de lancamento de pedidos enquanto a app da mesa ainda nao foi implementada.
+
+Recursos incluidos:
+
+- escolha rapida de mesa por botoes numerados;
+- selecao de subgrupos do cardapio por categoria;
+- adicao direta de produtos ao ticket da mesa;
+- criacao automatica de ticket quando a mesa ainda nao possui pedido aberto;
+- visualizacao do ticket atual da mesa em tempo real no proprio painel.
+
 ## Como executar
 
 1. Ative o ambiente virtual.
@@ -103,7 +139,18 @@ As credenciais iniciais ficam configuradas no arquivo `.env`.
 
 - `GET /api/catalog/menu`
 - `GET /api/admin/catalog/overview`
+- `GET /api/admin/categories`
+- `GET /api/admin/products`
+- `POST /api/admin/products`
+- `PUT /api/admin/products/<id>`
+- `DELETE /api/admin/products/<id>`
+- `GET /api/admin/products/dashboard?period=day|week|month`
+- `GET /api/admin/collaborators`
+- `GET /api/admin/collaborators/dashboard?period=day|week|month&collaborator_id=<id>`
 - `GET /api/admin/analytics/summary?period=day|week|month`
 - `GET /api/admin/analytics/collaborators?period=day|week|month`
 - `GET /api/admin/collaborators/<id>/performance?period=day|week|month`
 - `GET /api/colaborador/performance?period=day|week|month`
+- `GET /api/colaborador/ordering/bootstrap`
+- `GET /api/colaborador/tables/<table_id>/ticket`
+- `POST /api/colaborador/tables/<table_id>/ticket/items`

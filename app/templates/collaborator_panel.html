@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} | {{ app_name }}</title>
+    <style>
+        :root {
+            --bg: #f5ede3;
+            --panel: rgba(255, 250, 245, 0.96);
+            --text: #2c221b;
+            --muted: #736356;
+            --accent: #95552f;
+            --accent-dark: #78401f;
+            --accent-soft: #eadccf;
+            --border: #decbbc;
+            --danger: #a1362b;
+            --success: #2a6a3f;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(149, 85, 47, 0.15), transparent 28%),
+                linear-gradient(150deg, #faf5ee, #ead9cb);
+        }
+
+        .shell {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 2rem 1.2rem 3rem;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 1.35rem;
+            box-shadow: 0 22px 48px rgba(68, 41, 26, 0.08);
+        }
+
+        .metrics, .layout, .tables-grid, .products-grid, .summary-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .metrics {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            margin-bottom: 1rem;
+        }
+
+        .layout {
+            grid-template-columns: 260px 1fr 360px;
+            align-items: start;
+        }
+
+        .subgroups-card {
+            margin-top: 1rem;
+        }
+
+        .subgroups-row {
+            display: flex;
+            gap: 0.75rem;
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+        }
+
+        .subgroups-row::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .subgroups-row::-webkit-scrollbar-thumb {
+            background: #d8c1ae;
+            border-radius: 999px;
+        }
+
+        .tables-grid {
+            grid-template-columns: repeat(auto-fit, minmax(95px, 1fr));
+        }
+
+        .products-grid {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .summary-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .metric, .table-button, .category-button, .product-card, .ticket-line {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+        }
+
+        .metric {
+            padding: 1rem;
+        }
+
+        .label { color: var(--muted); margin-bottom: 0.35rem; }
+        .value { font-size: 1.12rem; font-weight: 700; }
+
+        .section-title { margin: 0 0 0.75rem; }
+
+        .category-list, .ticket-lines {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .category-button, .table-button {
+            padding: 0.95rem 1rem;
+            cursor: pointer;
+            font: inherit;
+            color: var(--text);
+            text-align: left;
+        }
+
+        .category-button.active, .table-button.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            border-color: transparent;
+        }
+
+        .category-button {
+            min-width: 180px;
+            white-space: nowrap;
+        }
+
+        .table-button small, .category-button small {
+            display: block;
+            margin-top: 0.35rem;
+            opacity: 0.8;
+        }
+
+        .product-card {
+            overflow: hidden;
+            display: grid;
+        }
+
+        .product-card figure {
+            margin: 0;
+            height: 150px;
+            background: linear-gradient(135deg, #e8d9cc, #f8f3ed);
+            display: grid;
+            place-items: center;
+            color: var(--muted);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-body {
+            padding: 1rem;
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .chip {
+            padding: 0.28rem 0.55rem;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            font-size: 0.82rem;
+            font-weight: 700;
+        }
+
+        .product-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-top: 0.3rem;
+        }
+
+        .qty-input {
+            width: 72px;
+            padding: 0.65rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            font: inherit;
+        }
+
+        button.primary {
+            border: 0;
+            border-radius: 999px;
+            padding: 0.8rem 1rem;
+            font: inherit;
+            font-weight: 700;
+            color: white;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            cursor: pointer;
+        }
+
+        button.secondary {
+            border: 0;
+            border-radius: 999px;
+            padding: 0.8rem 1rem;
+            font: inherit;
+            font-weight: 700;
+            color: var(--text);
+            background: var(--accent-soft);
+            cursor: pointer;
+        }
+
+        .ticket-line {
+            padding: 0.9rem 1rem;
+        }
+
+        .message {
+            min-height: 1.4rem;
+            margin-top: 0.8rem;
+            font-weight: 700;
+        }
+
+        .message.success { color: var(--success); }
+        .message.error { color: var(--danger); }
+
+        .muted { color: var(--muted); }
+
+        .empty {
+            border: 1px dashed var(--border);
+            border-radius: 18px;
+            padding: 1rem;
+            color: var(--muted);
+            background: #fff;
+        }
+
+        pre {
+            overflow: auto;
+            padding: 1rem;
+            border-radius: 16px;
+            background: #2c221d;
+            color: #f7ede1;
+        }
+
+        @media (max-width: 1120px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <div class="topbar">
+            <div>
+                <p>{{ app_name }}</p>
+                <h1>{{ page_title }}</h1>
+                <p class="muted">Escolha a mesa, selecione o subgrupo do cardapio e lance itens no ticket.</p>
+            </div>
+            <div class="topbar-actions">
+                <button id="refresh-button" type="button" class="secondary">Atualizar</button>
+                <button id="logout-button" type="button" class="primary">Sair</button>
+            </div>
+        </div>
+
+        <section class="card">
+            <div id="metrics" class="metrics"></div>
+        </section>
+
+        <section class="card subgroups-card">
+            <h2 class="section-title">Subgrupos</h2>
+            <div id="category-list" class="subgroups-row"></div>
+        </section>
+
+        <div class="layout" style="margin-top: 1rem;">
+            <section class="card">
+                <h2 class="section-title">Mesas</h2>
+                <div id="tables-grid" class="tables-grid"></div>
+            </section>
+
+            <section class="card">
+                <div style="display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1rem;">
+                    <div>
+                        <h2 class="section-title" style="margin-bottom:0.25rem;">Produtos</h2>
+                        <div id="products-caption" class="muted">Selecione uma categoria e uma mesa para comecar.</div>
+                    </div>
+                </div>
+                <div id="products-grid" class="products-grid"></div>
+                <div id="action-message" class="message"></div>
+            </section>
+
+            <section class="card">
+                <h2 class="section-title">Ticket da mesa</h2>
+                <div id="selected-table-label" class="muted">Nenhuma mesa selecionada.</div>
+                <div id="ticket-summary" class="summary-grid" style="margin-top: 1rem;"></div>
+                <div id="ticket-lines" class="ticket-lines" style="margin-top: 1rem;"></div>
+                <h3 style="margin-top: 1.4rem;">Resposta tecnica</h3>
+                <pre id="technical-response">Carregando...</pre>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = '/login';
+        }
+
+        const state = {
+            user: null,
+            categories: [],
+            tables: [],
+            selectedCategoryId: null,
+            selectedTableId: null,
+            currentTicket: null,
+        };
+
+        const metrics = document.getElementById('metrics');
+        const categoryList = document.getElementById('category-list');
+        const tablesGrid = document.getElementById('tables-grid');
+        const productsGrid = document.getElementById('products-grid');
+        const ticketSummary = document.getElementById('ticket-summary');
+        const ticketLines = document.getElementById('ticket-lines');
+        const actionMessage = document.getElementById('action-message');
+        const selectedTableLabel = document.getElementById('selected-table-label');
+        const productsCaption = document.getElementById('products-caption');
+        const technicalResponse = document.getElementById('technical-response');
+
+        function setMessage(text, type = '') {
+            actionMessage.textContent = text || '';
+            actionMessage.className = 'message';
+            if (type) {
+                actionMessage.classList.add(type);
+            }
+        }
+
+        function currency(value) {
+            return new Intl.NumberFormat('pt-PT', {
+                style: 'currency',
+                currency: 'EUR',
+            }).format(value || 0);
+        }
+
+        async function authorizedFetch(url, options = {}) {
+            const headers = {
+                Authorization: `Bearer ${token}`,
+                ...(options.headers || {}),
+            };
+            if (options.body) {
+                headers['Content-Type'] = 'application/json';
+            }
+
+            const response = await fetch(url, {
+                ...options,
+                headers,
+            });
+
+            if (response.status === 401 || response.status === 422) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('auth_user');
+                window.location.href = '/login';
+                throw new Error('Sessao expirada');
+            }
+
+            return response;
+        }
+
+        function renderMetrics() {
+            metrics.innerHTML = '';
+            const occupiedTables = state.tables.filter((table) => table.has_open_ticket).length;
+            const cards = [
+                { label: 'Colaborador', value: state.user?.name || 'Carregando...' },
+                { label: 'Mesas ativas', value: state.tables.length },
+                { label: 'Mesas com ticket aberto', value: occupiedTables },
+                { label: 'Categorias disponiveis', value: state.categories.length },
+            ];
+
+            cards.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'metric';
+                card.innerHTML = `<div class="label">${item.label}</div><div class="value">${item.value}</div>`;
+                metrics.appendChild(card);
+            });
+        }
+
+        function renderCategories() {
+            categoryList.innerHTML = '';
+            state.categories.forEach((category) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `category-button${state.selectedCategoryId === category.id ? ' active' : ''}`;
+                button.innerHTML = `${category.name}<small>${category.products.length} produtos</small>`;
+                button.addEventListener('click', () => {
+                    state.selectedCategoryId = category.id;
+                    renderCategories();
+                    renderProducts();
+                });
+                categoryList.appendChild(button);
+            });
+        }
+
+        function renderTables() {
+            tablesGrid.innerHTML = '';
+            state.tables.forEach((table) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `table-button${state.selectedTableId === table.id ? ' active' : ''}`;
+                button.innerHTML = `Mesa ${table.number}<small>${table.has_open_ticket ? 'Ticket aberto' : 'Sem ticket'}</small>`;
+                button.addEventListener('click', async () => {
+                    state.selectedTableId = table.id;
+                    renderTables();
+                    await loadTicket(table.id);
+                    renderProducts();
+                });
+                tablesGrid.appendChild(button);
+            });
+        }
+
+        function currentCategory() {
+            return state.categories.find((category) => category.id === state.selectedCategoryId) || null;
+        }
+
+        function renderProducts() {
+            productsGrid.innerHTML = '';
+            const category = currentCategory();
+            if (!category) {
+                productsGrid.innerHTML = '<div class="empty">Selecione um subgrupo do cardapio.</div>';
+                productsCaption.textContent = 'Selecione uma categoria e uma mesa para comecar.';
+                return;
+            }
+
+            productsCaption.textContent = state.selectedTableId
+                ? `Mesa selecionada pronta para lancamento em ${category.name}.`
+                : `Escolha uma mesa para adicionar itens de ${category.name}.`;
+
+            if (!category.products.length) {
+                productsGrid.innerHTML = '<div class="empty">Nao ha produtos ativos nesta categoria.</div>';
+                return;
+            }
+
+            category.products.forEach((product) => {
+                const card = document.createElement('article');
+                card.className = 'product-card';
+                const disabled = !state.selectedTableId || product.stock_status === 'out_of_stock';
+                card.innerHTML = `
+                    <figure>${product.image_url ? `<img src="${product.image_url}" alt="${product.name}">` : '<span>Sem imagem</span>'}</figure>
+                    <div class="product-body">
+                        <div class="chips">
+                            <span class="chip">${currency(product.price)}</span>
+                            <span class="chip">${product.stock_status}</span>
+                            ${product.is_vegan ? '<span class="chip">Vegan</span>' : ''}
+                        </div>
+                        <strong>${product.name}</strong>
+                        <div class="muted">${product.description}</div>
+                        <div>Estoque: ${product.stock_quantity}</div>
+                        <div class="product-actions">
+                            <input class="qty-input" type="number" min="1" step="1" value="1" data-role="quantity">
+                            <button class="primary" type="button" ${disabled ? 'disabled' : ''}>Adicionar</button>
+                        </div>
+                    </div>
+                `;
+                const quantityInput = card.querySelector('[data-role="quantity"]');
+                const addButton = card.querySelector('button');
+                addButton.addEventListener('click', async () => {
+                    await addProductToTicket(product.id, quantityInput.value);
+                });
+                productsGrid.appendChild(card);
+            });
+        }
+
+        function renderTicket(ticketPayload) {
+            const table = state.tables.find((entry) => entry.id === state.selectedTableId);
+            selectedTableLabel.textContent = table ? `Mesa ${table.number}` : 'Nenhuma mesa selecionada.';
+            ticketSummary.innerHTML = '';
+            ticketLines.innerHTML = '';
+
+            if (!ticketPayload) {
+                ticketSummary.innerHTML = '<div class="empty" style="grid-column:1 / -1;">Nenhum ticket aberto nesta mesa ainda.</div>';
+                technicalResponse.textContent = JSON.stringify({ table, ticket: null }, null, 2);
+                return;
+            }
+
+            const summaryCards = [
+                { label: 'Ticket', value: `#${ticketPayload.id}` },
+                { label: 'Status', value: ticketPayload.status },
+                { label: 'Colaborador', value: ticketPayload.collaborator || '-' },
+                { label: 'Total', value: currency(ticketPayload.total) },
+            ];
+
+            summaryCards.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'metric';
+                card.innerHTML = `<div class="label">${item.label}</div><div class="value">${item.value}</div>`;
+                ticketSummary.appendChild(card);
+            });
+
+            if (!ticketPayload.items.length) {
+                ticketLines.innerHTML = '<div class="empty">Ticket criado sem itens.</div>';
+            } else {
+                ticketPayload.items.forEach((item) => {
+                    const line = document.createElement('div');
+                    line.className = 'ticket-line';
+                    line.innerHTML = `
+                        <strong>${item.quantity}x ${item.name}</strong>
+                        <div>Unitario: ${currency(item.unit_price)}</div>
+                        <div>Total linha: ${currency(item.line_total)}</div>
+                    `;
+                    ticketLines.appendChild(line);
+                });
+            }
+
+            technicalResponse.textContent = JSON.stringify({ table, ticket: ticketPayload }, null, 2);
+        }
+
+        async function loadTicket(tableId) {
+            const response = await authorizedFetch(`/api/colaborador/tables/${tableId}/ticket`);
+            const data = await response.json();
+            state.currentTicket = data.ticket;
+            renderTicket(data.ticket);
+        }
+
+        async function addProductToTicket(productId, quantity) {
+            if (!state.selectedTableId) {
+                setMessage('Selecione primeiro uma mesa.', 'error');
+                return;
+            }
+
+            const response = await authorizedFetch(
+                `/api/colaborador/tables/${state.selectedTableId}/ticket/items`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify({ product_id: productId, quantity }),
+                }
+            );
+            const data = await response.json();
+
+            if (!response.ok) {
+                const error = data.errors ? Object.values(data.errors)[0] : data.message;
+                setMessage(error || 'Falha ao adicionar item ao ticket.', 'error');
+                return;
+            }
+
+            state.currentTicket = data.ticket;
+            setMessage(data.message, 'success');
+            renderTicket(data.ticket);
+            await refreshTables();
+        }
+
+        async function refreshTables() {
+            const bootstrapResponse = await authorizedFetch('/api/colaborador/ordering/bootstrap');
+            const bootstrapData = await bootstrapResponse.json();
+            state.user = bootstrapData.user;
+            state.categories = bootstrapData.categories;
+            state.tables = bootstrapData.tables;
+            if (!state.selectedCategoryId && state.categories.length) {
+                state.selectedCategoryId = state.categories[0].id;
+            }
+            renderMetrics();
+            renderCategories();
+            renderTables();
+            renderProducts();
+
+            if (state.selectedTableId) {
+                const stillExists = state.tables.some((table) => table.id === state.selectedTableId);
+                if (stillExists) {
+                    await loadTicket(state.selectedTableId);
+                } else {
+                    state.selectedTableId = null;
+                    state.currentTicket = null;
+                    renderTicket(null);
+                }
+            } else {
+                renderTicket(null);
+            }
+        }
+
+        document.getElementById('logout-button').addEventListener('click', () => {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('auth_user');
+            window.location.href = '/login';
+        });
+
+        document.getElementById('refresh-button').addEventListener('click', refreshTables);
+
+        refreshTables();
+        setInterval(refreshTables, 20000);
+    </script>
+</body>
+</html>

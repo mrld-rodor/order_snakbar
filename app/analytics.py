@@ -39,6 +39,40 @@ def get_catalog_overview():
     }
 
 
+def get_inventory_overview():
+    products = MenuProduct.query.order_by(MenuProduct.name.asc()).all()
+    total_units = sum(product.stock_quantity for product in products)
+    low_stock_products = [product for product in products if product.stock_status == "low_stock"]
+    out_of_stock_products = [product for product in products if product.stock_status == "out_of_stock"]
+    stock_value = sum(Decimal(product.price) * product.stock_quantity for product in products)
+
+    categories = []
+    for category in MenuCategory.query.order_by(MenuCategory.display_order.asc()).all():
+        category_products = list(category.products)
+        categories.append(
+            {
+                "category": category.name,
+                "product_count": len(category_products),
+                "stock_units": sum(product.stock_quantity for product in category_products),
+                "stock_value": float(
+                    sum(Decimal(product.price) * product.stock_quantity for product in category_products)
+                ),
+            }
+        )
+
+    return {
+        "total_products": len(products),
+        "active_products": len([product for product in products if product.active]),
+        "total_units": total_units,
+        "stock_value": float(stock_value.quantize(Decimal("0.01"))) if products else 0.0,
+        "low_stock_count": len(low_stock_products),
+        "out_of_stock_count": len(out_of_stock_products),
+        "low_stock_products": [product.to_dict() for product in low_stock_products],
+        "out_of_stock_products": [product.to_dict() for product in out_of_stock_products],
+        "categories": categories,
+    }
+
+
 def get_menu_catalog():
     categories = MenuCategory.query.order_by(MenuCategory.display_order.asc()).all()
     return {"categories": [category.to_dict(include_products=True) for category in categories]}
@@ -177,11 +211,97 @@ def get_collaborator_dashboard(collaborator):
     }
 
 
+def get_product_rankings(period):
+    orders = _paid_orders(period)
+    products = {}
+
+    for order in orders:
+        for item in order.items:
+            product = item.product
+            entry = products.setdefault(
+                item.product_id,
+                {
+                    "product_id": item.product_id,
+                    "product": item.product_name_snapshot,
+                    "category": product.category.name if product and product.category else None,
+                    "quantity": 0,
+                    "revenue": Decimal("0.00"),
+                    "stock_quantity": product.stock_quantity if product else 0,
+                    "stock_status": product.stock_status if product else "unknown",
+                },
+            )
+            entry["quantity"] += item.quantity
+            entry["revenue"] += Decimal(item.line_total)
+
+    ranking = []
+    for item in products.values():
+        ranking.append({**item, "revenue": float(item["revenue"])})
+
+    ranking.sort(key=lambda item: (item["revenue"], item["quantity"]), reverse=True)
+    return ranking
+
+
+def get_product_dashboard(period):
+    sales = get_sales_summary(period)
+    inventory = get_inventory_overview()
+    ranking = get_product_rankings(period)
+    return {
+        "period": normalize_period(period),
+        "sales": sales,
+        "inventory": inventory,
+        "top_products": ranking[:8],
+        "category_stock": inventory["categories"],
+        "recent_orders": get_recent_orders(limit=8),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
+def get_collaborators_list():
+    collaborators = (
+        Collaborator.query.filter_by(role="colaborador", active=True)
+        .order_by(Collaborator.name.asc())
+        .all()
+    )
+    return [collaborator.to_public_dict() for collaborator in collaborators]
+
+
+def get_collaborator_admin_dashboard(period, collaborator_id=None):
+    ranking = get_collaborator_rankings(period)
+    selected = Collaborator.query.get(collaborator_id) if collaborator_id is not None else None
+
+    open_orders_query = Order.query.filter(Order.status != "pago")
+    if collaborator_id is not None:
+        open_orders_query = open_orders_query.filter(Order.collaborator_id == collaborator_id)
+    open_orders = open_orders_query.order_by(Order.opened_at.desc()).all()
+
+    if selected is not None:
+        summary = get_sales_summary(period, selected.id)
+        recent_orders = get_recent_orders(limit=8, collaborator_id=selected.id)
+        selected_payload = selected.to_public_dict()
+    else:
+        summary = get_sales_summary(period)
+        recent_orders = get_recent_orders(limit=10)
+        selected_payload = None
+
+    return {
+        "period": normalize_period(period),
+        "selected_collaborator": selected_payload,
+        "summary": summary,
+        "ranking": ranking,
+        "collaborators": get_collaborators_list(),
+        "open_orders": [order.to_dict() for order in open_orders[:8]],
+        "open_orders_count": len(open_orders),
+        "recent_orders": recent_orders,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+
 def get_admin_dashboard():
     collaborators = Collaborator.query.filter_by(role="colaborador", active=True).count()
     return {
         "message": "Painel administrativo carregado com resumo operacional e comercial.",
         "catalog": get_catalog_overview(),
+        "inventory": get_inventory_overview(),
         "overview": {
             "day": get_sales_summary("day"),
             "week": get_sales_summary("week"),

@@ -20,6 +20,8 @@ class BaseConfig:
     JSON_SORT_KEYS = False
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///order_snakbar.db")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", str(4 * 1024 * 1024)))
+    PRODUCT_IMAGE_ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
     DEMO_SEED_ENABLED = os.getenv("DEMO_SEED_ENABLED", "true").lower() in {
         "1",
         "true",
