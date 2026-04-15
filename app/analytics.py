@@ -4,6 +4,9 @@ from decimal import Decimal
 from app.models import Collaborator, MenuCategory, MenuProduct, Order
 
 
+STAFF_ROLES = ("colaborador", "chefe_sala")
+
+
 def normalize_period(period):
     period = (period or "day").lower()
     if period not in {"day", "week", "month"}:
@@ -159,7 +162,12 @@ def get_recent_orders(limit=5, collaborator_id=None):
 def get_collaborator_rankings(period):
     collaborators = [
         collaborator
-        for collaborator in Collaborator.query.filter_by(role="colaborador", active=True).order_by(Collaborator.name.asc()).all()
+        for collaborator in Collaborator.query.filter(
+            Collaborator.role.in_(STAFF_ROLES),
+            Collaborator.active.is_(True),
+        )
+        .order_by(Collaborator.name.asc())
+        .all()
     ]
     orders = _paid_orders(period)
     metrics = {
@@ -258,7 +266,10 @@ def get_product_dashboard(period):
 
 def get_collaborators_list():
     collaborators = (
-        Collaborator.query.filter_by(role="colaborador", active=True)
+        Collaborator.query.filter(
+            Collaborator.role.in_(STAFF_ROLES),
+            Collaborator.active.is_(True),
+        )
         .order_by(Collaborator.name.asc())
         .all()
     )
@@ -297,7 +308,12 @@ def get_collaborator_admin_dashboard(period, collaborator_id=None):
 
 
 def get_admin_dashboard():
-    collaborators = Collaborator.query.filter_by(role="colaborador", active=True).count()
+    collaborators = (
+        Collaborator.query.filter(
+            Collaborator.role.in_(STAFF_ROLES),
+            Collaborator.active.is_(True),
+        ).count()
+    )
     return {
         "message": "Painel administrativo carregado com resumo operacional e comercial.",
         "catalog": get_catalog_overview(),

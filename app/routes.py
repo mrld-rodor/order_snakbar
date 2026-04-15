@@ -21,10 +21,15 @@ from app.auth import (
     public_user_data,
     role_required,
 )
+from app.collaborator_management import create_collaborator_account, list_manageable_collaborators
 from app.collaborator_ordering import (
     add_product_to_table_ticket,
+    apply_discount_to_ticket,
+    close_table_ticket,
     get_collaborator_ordering_bootstrap,
     get_table_ticket,
+    remove_ticket_item,
+    update_ticket_item_quantity,
 )
 from app.models import Collaborator
 from app.models import MenuCategory, MenuProduct
@@ -72,6 +77,17 @@ def admin_collaborators_page():
         "admin_collaborators.html",
         app_name=current_app.config["APP_NAME"],
         page_title="Painel de Colaboradores",
+        show_admin_nav=True,
+    )
+
+
+@main_blueprint.get("/chefia")
+def floor_chief_page():
+    return render_template(
+        "admin_collaborators.html",
+        app_name=current_app.config["APP_NAME"],
+        page_title="Painel da Chefia de Sala",
+        show_admin_nav=False,
     )
 
 
@@ -89,13 +105,13 @@ def admin_catalog_page():
 @main_blueprint.post("/api/auth/login")
 def login():
     payload = request.get_json(silent=True) or {}
-    email = (payload.get("email") or "").strip().lower()
-    password = payload.get("password") or ""
+    identifier = (payload.get("identifier") or payload.get("email") or "").strip()
+    secret = payload.get("secret") or payload.get("password") or ""
 
-    if not email or not password:
-        return jsonify({"message": "Email e senha sao obrigatorios."}), 400
+    if not identifier or not secret:
+        return jsonify({"message": "Identificador e senha sao obrigatorios."}), 400
 
-    user = authenticate_user(email, password)
+    user = authenticate_user(identifier, secret)
     if not user:
         return jsonify({"message": "Credenciais invalidas."}), 401
 
@@ -126,7 +142,7 @@ def current_user():
 
 
 @main_blueprint.get("/api/colaborador/area")
-@role_required("colaborador", "administrador")
+@role_required("colaborador", "administrador", "chefe_sala")
 def collaborator_area():
     collaborator = get_current_collaborator()
     if collaborator is None:
@@ -135,7 +151,7 @@ def collaborator_area():
 
 
 @main_blueprint.get("/api/colaborador/ordering/bootstrap")
-@role_required("colaborador", "administrador")
+@role_required("colaborador", "administrador", "chefe_sala")
 def collaborator_ordering_bootstrap():
     collaborator = get_current_collaborator()
     if collaborator is None:
@@ -144,13 +160,16 @@ def collaborator_ordering_bootstrap():
 
 
 @main_blueprint.get("/api/colaborador/tables/<int:table_id>/ticket")
-@role_required("colaborador", "administrador")
+@role_required("colaborador", "administrador", "chefe_sala")
 def collaborator_table_ticket(table_id):
-    return jsonify(get_table_ticket(table_id))
+    collaborator = get_current_collaborator()
+    if collaborator is None:
+        return jsonify({"message": "Usuario autenticado nao encontrado."}), 404
+    return jsonify(get_table_ticket(table_id, collaborator))
 
 
 @main_blueprint.post("/api/colaborador/tables/<int:table_id>/ticket/items")
-@role_required("colaborador", "administrador")
+@role_required("colaborador", "administrador", "chefe_sala")
 def collaborator_add_ticket_item(table_id):
     collaborator = get_current_collaborator()
     if collaborator is None:
@@ -168,6 +187,74 @@ def collaborator_add_ticket_item(table_id):
     return jsonify({"message": "Item adicionado ao ticket com sucesso.", "ticket": ticket}), 201
 
 
+@main_blueprint.put("/api/colaborador/tables/<int:table_id>/ticket/items/<int:item_id>")
+@role_required("colaborador", "administrador", "chefe_sala")
+def collaborator_update_ticket_item(table_id, item_id):
+    collaborator = get_current_collaborator()
+    if collaborator is None:
+        return jsonify({"message": "Usuario autenticado nao encontrado."}), 404
+
+    payload = request.get_json(silent=True) or {}
+    ticket, errors = update_ticket_item_quantity(
+        collaborator=collaborator,
+        table_id=table_id,
+        item_id=item_id,
+        quantity=payload.get("quantity"),
+    )
+    if errors:
+        return jsonify({"message": "Falha ao atualizar item do ticket.", "errors": errors}), 400
+    return jsonify({"message": "Item atualizado com sucesso.", "ticket": ticket})
+
+
+@main_blueprint.delete("/api/colaborador/tables/<int:table_id>/ticket/items/<int:item_id>")
+@role_required("colaborador", "administrador", "chefe_sala")
+def collaborator_delete_ticket_item(table_id, item_id):
+    collaborator = get_current_collaborator()
+    if collaborator is None:
+        return jsonify({"message": "Usuario autenticado nao encontrado."}), 404
+
+    ticket, errors = remove_ticket_item(collaborator=collaborator, table_id=table_id, item_id=item_id)
+    if errors:
+        return jsonify({"message": "Falha ao remover item do ticket.", "errors": errors}), 400
+    return jsonify({"message": "Item removido com sucesso.", "ticket": ticket})
+
+
+@main_blueprint.put("/api/colaborador/tables/<int:table_id>/ticket/discount")
+@role_required("colaborador", "administrador", "chefe_sala")
+def collaborator_apply_discount(table_id):
+    collaborator = get_current_collaborator()
+    if collaborator is None:
+        return jsonify({"message": "Usuario autenticado nao encontrado."}), 404
+
+    payload = request.get_json(silent=True) or {}
+    ticket, errors = apply_discount_to_ticket(
+        collaborator=collaborator,
+        table_id=table_id,
+        discount_amount=payload.get("discount_amount"),
+    )
+    if errors:
+        return jsonify({"message": "Falha ao aplicar desconto.", "errors": errors}), 400
+    return jsonify({"message": "Desconto atualizado com sucesso.", "ticket": ticket})
+
+
+@main_blueprint.put("/api/colaborador/tables/<int:table_id>/ticket/close")
+@role_required("colaborador", "administrador", "chefe_sala")
+def collaborator_close_ticket(table_id):
+    collaborator = get_current_collaborator()
+    if collaborator is None:
+        return jsonify({"message": "Usuario autenticado nao encontrado."}), 404
+
+    payload = request.get_json(silent=True) or {}
+    ticket, errors = close_table_ticket(
+        collaborator=collaborator,
+        table_id=table_id,
+        payment_method=payload.get("payment_method"),
+    )
+    if errors:
+        return jsonify({"message": "Falha ao fechar a conta.", "errors": errors}), 400
+    return jsonify({"message": "Conta fechada com sucesso.", "ticket": ticket})
+
+
 @main_blueprint.get("/api/admin/area")
 @role_required("administrador")
 def admin_area():
@@ -175,7 +262,7 @@ def admin_area():
 
 
 @main_blueprint.get("/api/colaborador/performance")
-@role_required("colaborador", "administrador")
+@role_required("colaborador", "administrador", "chefe_sala")
 def collaborator_performance():
     collaborator = get_current_collaborator()
     if collaborator is None:
@@ -266,13 +353,13 @@ def admin_analytics_summary():
 
 
 @main_blueprint.get("/api/admin/collaborators")
-@role_required("administrador")
+@role_required("administrador", "chefe_sala")
 def admin_collaborators_list():
     return jsonify({"collaborators": get_collaborators_list()})
 
 
 @main_blueprint.get("/api/admin/collaborators/dashboard")
-@role_required("administrador")
+@role_required("administrador", "chefe_sala")
 def admin_collaborators_dashboard():
     period = request.args.get("period", "day")
     collaborator_id = request.args.get("collaborator_id", type=int)
@@ -280,14 +367,14 @@ def admin_collaborators_dashboard():
 
 
 @main_blueprint.get("/api/admin/analytics/collaborators")
-@role_required("administrador")
+@role_required("administrador", "chefe_sala")
 def admin_collaborator_analytics():
     period = request.args.get("period", "month")
     return jsonify({"period": period, "ranking": get_collaborator_rankings(period)})
 
 
 @main_blueprint.get("/api/admin/collaborators/<int:collaborator_id>/performance")
-@role_required("administrador")
+@role_required("administrador", "chefe_sala")
 def admin_collaborator_performance(collaborator_id):
     collaborator = Collaborator.query.get_or_404(collaborator_id)
     period = request.args.get("period", "month")
@@ -298,6 +385,35 @@ def admin_collaborator_performance(collaborator_id):
             "recent_orders": get_recent_orders(limit=8, collaborator_id=collaborator.id),
         }
     )
+
+
+@main_blueprint.get("/api/management/collaborators")
+@role_required("administrador", "chefe_sala")
+def management_collaborators():
+    return jsonify({"collaborators": list_manageable_collaborators()})
+
+
+@main_blueprint.post("/api/management/collaborators")
+@role_required("administrador", "chefe_sala")
+def management_create_collaborator():
+    collaborator = get_current_collaborator()
+    if collaborator is None:
+        return jsonify({"message": "Usuario autenticado nao encontrado."}), 404
+
+    created, credentials, errors = create_collaborator_account(
+        collaborator,
+        request.get_json(silent=True) or {},
+    )
+    if errors:
+        return jsonify({"message": "Falha ao cadastrar colaborador.", "errors": errors}), 400
+
+    return jsonify(
+        {
+            "message": "Colaborador cadastrado com sucesso.",
+            "collaborator": created.to_public_dict(),
+            "credentials": credentials,
+        }
+    ), 201
 
 
 @main_blueprint.get("/health")

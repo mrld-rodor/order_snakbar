@@ -3,14 +3,27 @@ from functools import wraps
 from flask import current_app, jsonify
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
+from app.collaborator_management import normalize_access_code
 from app.models import Collaborator
 
 
-def authenticate_user(email, password):
-    user = Collaborator.query.filter_by(email=email.lower(), active=True).first()
+def authenticate_user(identifier, secret):
+    identifier = (identifier or "").strip()
+    secret = str(secret or "")
+    if not identifier or not secret:
+        return None
+
+    user = None
+    if "@" in identifier:
+        user = Collaborator.query.filter_by(email=identifier.lower(), active=True).first()
+    else:
+        access_code = normalize_access_code(identifier)
+        if access_code:
+            user = Collaborator.query.filter_by(access_code=access_code, active=True).first()
+
     if user is None:
         return None
-    if not user.check_password(password):
+    if not user.check_password(secret) and not user.check_pin(secret):
         return None
     return public_user_data(user)
 

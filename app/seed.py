@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
+from app.collaborator_management import ensure_collaborator_access
 from app.db import db
 from app.models import (
     Collaborator,
@@ -180,6 +181,12 @@ MENU_PRODUCTS = [
 
 DEMO_COLLABORATORS = [
     {
+        "name": "Rita Fonseca",
+        "email": "rita.fonseca@cafeteria.local",
+        "password": "chefia123",
+        "role": "chefe_sala",
+    },
+    {
         "name": "Ana Costa",
         "email": "ana.costa@cafeteria.local",
         "password": "colaborador123",
@@ -226,6 +233,12 @@ def _ensure_collaborators(config):
             "password": config["DEFAULT_COLLABORATOR_PASSWORD"],
             "role": "colaborador",
         },
+        {
+            "name": config["DEFAULT_FLOOR_CHIEF_NAME"],
+            "email": config["DEFAULT_FLOOR_CHIEF_EMAIL"],
+            "password": config["DEFAULT_FLOOR_CHIEF_PASSWORD"],
+            "role": "chefe_sala",
+        },
         *DEMO_COLLABORATORS,
     ]
 
@@ -240,6 +253,10 @@ def _ensure_collaborators(config):
             )
             collaborator.set_password(item["password"])
             db.session.add(collaborator)
+        elif collaborator.role != item["role"] and collaborator.email == item["email"].lower():
+            collaborator.role = item["role"]
+
+        ensure_collaborator_access(collaborator)
 
 
 def _ensure_categories():

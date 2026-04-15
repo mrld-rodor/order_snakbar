@@ -38,19 +38,20 @@ Foi adicionada uma base minima executavel em Flask com:
 
 ## Autenticacao implementada
 
-Foi adicionado um fluxo inicial de autenticacao com JWT para dois perfis:
+Foi adicionado um fluxo inicial de autenticacao com JWT para tres perfis:
 
 - `colaborador`
+- `chefe_sala`
 - `administrador`
 
 Recursos incluidos nesta etapa:
 
-- login via `POST /api/auth/login`;
+- login via `POST /api/auth/login` com email e senha ou codigo de acesso e PIN;
 - consulta do usuario autenticado em `GET /api/auth/me`;
 - area protegida do colaborador em `GET /api/colaborador/area`;
 - area protegida do administrador em `GET /api/admin/area`;
 - tela de login em `/login`;
-- paineis iniciais em `/colaborador` e `/admin`.
+- paineis iniciais em `/colaborador`, `/chefia` e `/admin`.
 
 ## Banco de dados e analitica implementados
 
@@ -108,8 +109,23 @@ Recursos incluidos:
 - escolha rapida de mesa por botoes numerados;
 - selecao de subgrupos do cardapio por categoria;
 - adicao direta de produtos ao ticket da mesa;
+- atualizacao de quantidade e remocao de itens do ticket;
+- aplicacao e limpeza de desconto na conta da mesa;
 - criacao automatica de ticket quando a mesa ainda nao possui pedido aberto;
 - visualizacao do ticket atual da mesa em tempo real no proprio painel.
+
+## Gestao da equipa e chefia
+
+Foi adicionada uma camada operacional para o perfil `chefe_sala`, com foco em pessoas e controle das contas das mesas.
+
+Recursos incluidos:
+
+- cadastro de colaboradores por administrador ou chefe de sala;
+- cadastro de novos chefes de sala por administrador;
+- geracao automatica de codigo de acesso com 3 letras e 2 numeros;
+- geracao automatica de PIN inicial com 4 digitos;
+- painel de equipa em `/chefia` com listagem operacional e credenciais geradas;
+- acesso da chefia ao controle completo das contas das mesas no painel `/colaborador`.
 
 ## Como executar
 
@@ -134,6 +150,9 @@ As credenciais iniciais ficam configuradas no arquivo `.env`.
 
 - administrador: `ADMIN_EMAIL` e `ADMIN_PASSWORD`
 - colaborador: `COLLABORATOR_EMAIL` e `COLLABORATOR_PASSWORD`
+- chefe de sala: `FLOOR_CHIEF_EMAIL` e `FLOOR_CHIEF_PASSWORD`
+
+Colaboradores e chefia recebem tambem um `access_code` e um `PIN` inicial para uso no sistema de vendas.
 
 ## Endpoints relevantes desta etapa
 
@@ -154,3 +173,8 @@ As credenciais iniciais ficam configuradas no arquivo `.env`.
 - `GET /api/colaborador/ordering/bootstrap`
 - `GET /api/colaborador/tables/<table_id>/ticket`
 - `POST /api/colaborador/tables/<table_id>/ticket/items`
+- `PUT /api/colaborador/tables/<table_id>/ticket/items/<item_id>`
+- `DELETE /api/colaborador/tables/<table_id>/ticket/items/<item_id>`
+- `PUT /api/colaborador/tables/<table_id>/ticket/discount`
+- `GET /api/management/collaborators`
+- `POST /api/management/collaborators`

@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
+from sqlalchemy import inspect as sqlalchemy_inspect
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.db import db
@@ -16,7 +17,10 @@ class Collaborator(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), nullable=False, unique=True, index=True)
+    access_code = db.Column(db.String(5), unique=True, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
+    pin_hash = db.Column(db.String(255))
+    pin_code = db.Column(db.String(4))
     role = db.Column(db.String(30), nullable=False, default="colaborador")
     active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
@@ -30,14 +34,29 @@ class Collaborator(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-    def to_public_dict(self):
-        return {
+    def set_pin(self, pin):
+        normalized_pin = str(pin).zfill(4)
+        self.pin_hash = generate_password_hash(normalized_pin)
+        self.pin_code = normalized_pin
+
+    def check_pin(self, pin):
+        if not self.pin_hash:
+            return False
+        return check_password_hash(self.pin_hash, str(pin))
+
+    def to_public_dict(self, include_pin=False):
+        payload = {
             "id": self.id,
             "name": self.name,
             "email": self.email,
+            "access_code": self.access_code,
             "role": self.role,
             "active": self.active,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
         }
+        if include_pin:
+            payload["pin_code"] = self.pin_code
+        return payload
 
 
 class MenuCategory(db.Model):
@@ -142,6 +161,8 @@ class Order(db.Model):
     collaborator_id = db.Column(db.Integer, db.ForeignKey("collaborators.id"), nullable=False)
     status = db.Column(db.String(30), nullable=False, default="aberto")
     notes = db.Column(db.String(255))
+    subtotal = db.Column(db.Numeric(10, 2), nullable=False, default=Decimal("0.00"))
+    discount_amount = db.Column(db.Numeric(10, 2), nullable=False, default=Decimal("0.00"))
     total = db.Column(db.Numeric(10, 2), nullable=False, default=Decimal("0.00"))
     opened_at = db.Column(db.DateTime(timezone=True), nullable=False, default=utcnow)
     closed_at = db.Column(db.DateTime(timezone=True))
@@ -156,18 +177,34 @@ class Order(db.Model):
     )
 
     def recalculate_total(self):
-        total = Decimal("0.00")
+        subtotal = Decimal("0.00")
         for item in self.items:
-            total += Decimal(item.line_total)
-        self.total = total.quantize(Decimal("0.01"))
+            if sqlalchemy_inspect(item).deleted:
+                continue
+            subtotal += Decimal(item.line_total)
+
+        discount_amount = Decimal(self.discount_amount or 0)
+        if discount_amount < 0:
+            discount_amount = Decimal("0.00")
+        if discount_amount > subtotal:
+            discount_amount = subtotal
+
+        self.subtotal = subtotal.quantize(Decimal("0.01"))
+        self.discount_amount = discount_amount.quantize(Decimal("0.01"))
+        self.total = (subtotal - discount_amount).quantize(Decimal("0.01"))
 
     def to_dict(self):
         return {
             "id": self.id,
+            "table_id": self.table_id,
             "table_number": self.table.number if self.table else None,
+            "collaborator_id": self.collaborator_id,
             "collaborator": self.collaborator.name if self.collaborator else None,
+            "owner": self.collaborator.to_public_dict(include_pin=True) if self.collaborator else None,
             "status": self.status,
             "notes": self.notes,
+            "subtotal": float(self.subtotal),
+            "discount_amount": float(self.discount_amount),
             "total": float(self.total),
             "opened_at": self.opened_at.isoformat() if self.opened_at else None,
             "closed_at": self.closed_at.isoformat() if self.closed_at else None,

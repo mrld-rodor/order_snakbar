@@ -106,24 +106,24 @@
     <section class="card">
         <p>Sistema de autenticacao inicial</p>
         <h1>Entrar no {{ app_name }}</h1>
-        <p>Use as credenciais configuradas no arquivo <strong>.env</strong>. Os usuarios sao persistidos automaticamente no banco na primeira execucao.</p>
+        <p>Administradores podem entrar com email e senha. Colaboradores e chefia podem usar email e senha ou codigo de acesso com PIN de 4 digitos.</p>
 
         <form id="login-form">
             <label>
-                Email
-                <input id="email" name="email" type="email" autocomplete="username" required>
+                Email ou codigo
+                <input id="identifier" name="identifier" type="text" autocomplete="username" required>
             </label>
 
             <label>
-                Senha
-                <input id="password" name="password" type="password" autocomplete="current-password" required>
+                Senha ou PIN
+                <input id="secret" name="secret" type="password" autocomplete="current-password" required>
             </label>
 
             <button type="submit">Entrar</button>
         </form>
 
         <div id="message" class="message"></div>
-        <p class="helper">Perfis suportados nesta etapa: <strong>colaborador</strong> e <strong>administrador</strong>. O sistema ja nasce com catalogo, colaboradores e historico comercial de demonstracao.</p>
+        <p class="helper">Perfis suportados: <strong>administrador</strong>, <strong>chefe_sala</strong> e <strong>colaborador</strong>. O sistema continua semear dados operacionais e usuarios de demonstracao na primeira execucao.</p>
     </section>
 
     <script>
@@ -136,8 +136,8 @@
             message.className = 'message';
 
             const payload = {
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
+                identifier: document.getElementById('identifier').value,
+                secret: document.getElementById('secret').value,
             };
 
             const response = await fetch('/api/auth/login', {
@@ -159,7 +159,17 @@
             message.textContent = `Login realizado como ${data.user.role}.`;
             message.classList.add('success');
 
-            window.location.href = data.user.role === 'administrador' ? '/admin' : '/colaborador';
+            if (data.user.role === 'administrador') {
+                window.location.href = '/admin';
+                return;
+            }
+
+            if (data.user.role === 'chefe_sala') {
+                window.location.href = '/chefia';
+                return;
+            }
+
+            window.location.href = '/colaborador';
         });
     </script>
 </body>

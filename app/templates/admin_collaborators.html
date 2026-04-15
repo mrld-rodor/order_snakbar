@@ -34,21 +34,31 @@
         }
         .toolbar { justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; }
         .controls { display: flex; gap: 0.8rem; flex-wrap: wrap; }
-        select, button {
+        select, button, input {
             font: inherit; border-radius: 999px; padding: 0.75rem 1rem; border: 1px solid var(--border);
         }
         button { border: 0; color: white; cursor: pointer; font-weight: 700; background: linear-gradient(135deg, var(--accent), #73401f); }
-        .metrics, .layout { display: grid; gap: 1rem; }
+        .secondary-button { background: var(--accent-soft); color: var(--text); }
+        .metrics, .layout, .management-grid, .roster { display: grid; gap: 1rem; }
         .metrics { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 1rem; }
         .layout { grid-template-columns: 1.2fr 1fr; }
-        .metric, .list-item { background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 1rem; }
+        .management-grid { grid-template-columns: 360px 1fr; margin-bottom: 1rem; }
+        .roster { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+        .metric, .list-item, .roster-card, .credentials-box, .info-box { background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 1rem; }
+        .form-grid { display: grid; gap: 0.8rem; }
+        .form-grid label { display: grid; gap: 0.35rem; font-weight: 600; }
         .label { color: var(--muted); margin-bottom: 0.35rem; }
         .value { font-size: 1.15rem; font-weight: 700; }
         .lists { display: grid; gap: 0.8rem; }
         .list-item strong { display: block; margin-bottom: 0.4rem; }
         .rank { display: inline-flex; align-items: center; justify-content: center; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--accent-soft); font-weight: 700; margin-right: 0.5rem; }
+        .chips { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-top: 0.5rem; }
+        .chip { display: inline-flex; padding: 0.25rem 0.6rem; border-radius: 999px; background: var(--accent-soft); font-size: 0.82rem; font-weight: 700; }
+        .message { min-height: 1.4rem; margin-top: 0.6rem; font-weight: 700; }
+        .message.error { color: #9c2f28; }
+        .message.success { color: #2d6a44; }
         pre { overflow: auto; padding: 1rem; border-radius: 16px; background: #2c221d; color: #f7ede1; }
-        @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
+        @media (max-width: 980px) { .layout, .management-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -57,12 +67,62 @@
             <div>
                 <p>{{ app_name }}</p>
                 <h1>{{ page_title }}</h1>
-                <p>Escolha um colaborador ou veja a equipa inteira com atualizacao automatica dos indicadores.</p>
+                <p>Gestao da equipa, credenciais operacionais e acompanhamento de produtividade em tempo real.</p>
             </div>
-            <button id="logout-button" type="button">Sair</button>
+            <div class="toolbar">
+                <a href="/colaborador" style="text-decoration:none;"><button class="secondary-button" type="button">Terminal de mesas</button></a>
+                <button id="logout-button" type="button">Sair</button>
+            </div>
         </div>
 
+        {% if show_admin_nav %}
         {% include 'admin_nav.html' %}
+        {% endif %}
+
+        <div class="management-grid">
+            <section class="card">
+                <div style="display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1rem;">
+                    <div>
+                        <h2 style="margin:0;">Cadastro de equipa</h2>
+                        <p style="margin:0.3rem 0 0; color:#726256;">Administrador cria chefia e colaboradores. Chefia cria colaboradores e acompanha credenciais.</p>
+                    </div>
+                </div>
+
+                <div id="current-user-box" class="info-box" style="margin-bottom:1rem;">
+                    Carregando contexto do utilizador...
+                </div>
+
+                <form id="create-collaborator-form" class="form-grid">
+                    <label>
+                        Nome
+                        <input id="create-name" name="name" type="text" required>
+                    </label>
+                    <label>
+                        Email
+                        <input id="create-email" name="email" type="email" required>
+                    </label>
+                    <label>
+                        Perfil
+                        <select id="create-role" name="role"></select>
+                    </label>
+                    <button type="submit">Gerar acesso e PIN</button>
+                </form>
+                <div id="create-message" class="message"></div>
+
+                <div id="generated-credentials" class="credentials-box" style="display:none; margin-top:1rem;"></div>
+            </section>
+
+            <section class="card">
+                <div style="display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1rem;">
+                    <div>
+                        <h2 style="margin:0;">Equipa cadastrada</h2>
+                        <p style="margin:0.3rem 0 0; color:#726256;">Lista operacional com codigos de acesso para o sistema de vendas.</p>
+                    </div>
+                    <button id="refresh-roster-button" class="secondary-button" type="button">Atualizar lista</button>
+                </div>
+                <div id="roster" class="roster"></div>
+            </section>
+        </div>
 
         <section class="card">
             <div class="toolbar">
@@ -116,6 +176,17 @@
         const openOrders = document.getElementById('open-orders');
         const recentOrders = document.getElementById('recent-orders');
         const technicalResponse = document.getElementById('technical-response');
+        const roster = document.getElementById('roster');
+        const createForm = document.getElementById('create-collaborator-form');
+        const createMessage = document.getElementById('create-message');
+        const createRole = document.getElementById('create-role');
+        const generatedCredentials = document.getElementById('generated-credentials');
+        const currentUserBox = document.getElementById('current-user-box');
+
+        const state = {
+            currentUser: null,
+            collaborators: [],
+        };
 
         async function authorizedFetch(url) {
             const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
@@ -130,6 +201,48 @@
 
         function currency(value) {
             return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(value || 0);
+        }
+
+        function setCreateMessage(text, type = '') {
+            createMessage.textContent = text || '';
+            createMessage.className = 'message';
+            if (type) {
+                createMessage.classList.add(type);
+            }
+        }
+
+        function redirectByRole(role) {
+            if (role === 'administrador' || role === 'chefe_sala') {
+                return;
+            }
+            window.location.href = '/colaborador';
+        }
+
+        function updateRoleOptions() {
+            const options = state.currentUser?.role === 'administrador'
+                ? [
+                    { value: 'colaborador', label: 'Colaborador' },
+                    { value: 'chefe_sala', label: 'Chefe de sala' },
+                ]
+                : [{ value: 'colaborador', label: 'Colaborador' }];
+
+            createRole.innerHTML = options
+                .map((option) => `<option value="${option.value}">${option.label}</option>`)
+                .join('');
+        }
+
+        function renderCurrentUser() {
+            if (!state.currentUser) {
+                currentUserBox.textContent = 'Utilizador autenticado nao encontrado.';
+                return;
+            }
+
+            currentUserBox.innerHTML = `
+                <div class="label">Sessao atual</div>
+                <div class="value">${state.currentUser.name}</div>
+                <div style="margin-top:0.4rem;">Perfil: ${state.currentUser.role}</div>
+                <div>Codigo de acesso: ${state.currentUser.access_code || 'Nao aplicavel'}</div>
+            `;
         }
 
         function renderList(container, items, mapper, emptyMessage) {
@@ -166,8 +279,47 @@
             });
         }
 
+        function renderRoster() {
+            roster.innerHTML = '';
+            if (!state.collaborators.length) {
+                roster.innerHTML = '<div class="roster-card">Nenhum colaborador cadastrado ainda.</div>';
+                return;
+            }
+
+            state.collaborators.forEach((item) => {
+                const node = document.createElement('div');
+                node.className = 'roster-card';
+                node.innerHTML = `
+                    <strong>${item.name}</strong>
+                    <div style="margin-top:0.45rem;">${item.email}</div>
+                    <div class="chips">
+                        <span class="chip">${item.role}</span>
+                        <span class="chip">Codigo ${item.access_code || 'N/D'}</span>
+                        <span class="chip">${item.active ? 'Ativo' : 'Inativo'}</span>
+                    </div>
+                `;
+                roster.appendChild(node);
+            });
+        }
+
+        async function loadCurrentUser() {
+            const response = await authorizedFetch('/api/auth/me');
+            const data = await response.json();
+            state.currentUser = data.user;
+            redirectByRole(state.currentUser.role);
+            renderCurrentUser();
+            updateRoleOptions();
+        }
+
+        async function loadManagedCollaborators() {
+            const response = await authorizedFetch('/api/management/collaborators');
+            const data = await response.json();
+            state.collaborators = data.collaborators;
+            renderRoster();
+        }
+
         async function loadCollaborators() {
-            const response = await authorizedFetch('/api/admin/collaborators');
+            const response = await authorizedFetch('/api/management/collaborators');
             const data = await response.json();
             collaboratorSelect.innerHTML = '<option value="">Toda a equipa</option>';
             data.collaborators.forEach((item) => {
@@ -215,16 +367,54 @@
             technicalResponse.textContent = JSON.stringify(data, null, 2);
         }
 
+        createForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            setCreateMessage('');
+            generatedCredentials.style.display = 'none';
+
+            const payload = {
+                name: document.getElementById('create-name').value,
+                email: document.getElementById('create-email').value,
+                role: createRole.value,
+            };
+
+            const response = await authorizedFetch('/api/management/collaborators', {
+                method: 'POST',
+                body: JSON.stringify(payload),
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                const error = data.errors ? Object.values(data.errors)[0] : data.message;
+                setCreateMessage(error || 'Falha ao cadastrar colaborador.', 'error');
+                return;
+            }
+
+            createForm.reset();
+            updateRoleOptions();
+            setCreateMessage(data.message, 'success');
+            generatedCredentials.style.display = 'block';
+            generatedCredentials.innerHTML = `
+                <div class="label">Credenciais geradas</div>
+                <div class="value">${data.collaborator.name}</div>
+                <div style="margin-top:0.4rem;">Codigo de acesso: <strong>${data.credentials.access_code}</strong></div>
+                <div>PIN inicial: <strong>${data.credentials.pin}</strong></div>
+            `;
+
+            await Promise.all([loadManagedCollaborators(), loadCollaborators(), loadDashboard()]);
+        });
+
         document.getElementById('logout-button').addEventListener('click', () => {
             localStorage.removeItem('access_token');
             localStorage.removeItem('auth_user');
             window.location.href = '/login';
         });
         document.getElementById('refresh-button').addEventListener('click', loadDashboard);
+        document.getElementById('refresh-roster-button').addEventListener('click', loadManagedCollaborators);
         periodSelect.addEventListener('change', loadDashboard);
         collaboratorSelect.addEventListener('change', loadDashboard);
 
-        loadCollaborators().then(loadDashboard);
+        Promise.all([loadCurrentUser(), loadManagedCollaborators(), loadCollaborators()]).then(loadDashboard);
         setInterval(loadDashboard, 20000);
     </script>
 </body>

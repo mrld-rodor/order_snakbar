@@ -38,6 +38,9 @@ class BaseConfig:
     DEFAULT_COLLABORATOR_PASSWORD = os.getenv(
         "COLLABORATOR_PASSWORD", "colaborador123"
     )
+    DEFAULT_FLOOR_CHIEF_NAME = os.getenv("FLOOR_CHIEF_NAME", "Chefe de Sala")
+    DEFAULT_FLOOR_CHIEF_EMAIL = os.getenv("FLOOR_CHIEF_EMAIL", "chefia@cafeteria.local")
+    DEFAULT_FLOOR_CHIEF_PASSWORD = os.getenv("FLOOR_CHIEF_PASSWORD", "chefia123")
 
 
 class DevelopmentConfig(BaseConfig):

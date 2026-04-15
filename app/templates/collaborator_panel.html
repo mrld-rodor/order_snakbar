@@ -230,6 +230,49 @@
             padding: 0.9rem 1rem;
         }
 
+        .ticket-controls {
+            display: grid;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .credentials-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .credentials-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.9rem;
+        }
+
+        .credential-box {
+            background: #f8f1ea;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 0.85rem;
+        }
+
+        .inline-form {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .line-actions {
+            display: flex;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 0.75rem;
+        }
+
         .message {
             min-height: 1.4rem;
             margin-top: 0.8rem;
@@ -268,7 +311,7 @@
             <div>
                 <p>{{ app_name }}</p>
                 <h1>{{ page_title }}</h1>
-                <p class="muted">Escolha a mesa, selecione o subgrupo do cardapio e lance itens no ticket.</p>
+                <p class="muted">Escolha a mesa, acompanhe o consumo atual, aplique descontos e ajuste itens da conta em tempo real.</p>
             </div>
             <div class="topbar-actions">
                 <button id="refresh-button" type="button" class="secondary">Atualizar</button>
@@ -305,7 +348,26 @@
             <section class="card">
                 <h2 class="section-title">Ticket da mesa</h2>
                 <div id="selected-table-label" class="muted">Nenhuma mesa selecionada.</div>
+                <div id="owner-credentials-card" class="credentials-card"></div>
                 <div id="ticket-summary" class="summary-grid" style="margin-top: 1rem;"></div>
+                <div class="ticket-controls">
+                    <div class="inline-form">
+                        <label for="discount-input" class="muted">Desconto da mesa</label>
+                        <input id="discount-input" class="qty-input" type="number" min="0" step="0.01" value="0">
+                        <button id="apply-discount-button" class="secondary" type="button">Aplicar desconto</button>
+                        <button id="clear-discount-button" class="secondary" type="button">Limpar desconto</button>
+                    </div>
+                    <div class="inline-form">
+                        <label for="payment-method-select" class="muted">Fechar conta com</label>
+                        <select id="payment-method-select" class="qty-input" style="width: 140px;">
+                            <option value="dinheiro">Dinheiro</option>
+                            <option value="cartao">Cartao</option>
+                            <option value="pix">Pix</option>
+                            <option value="balcao">Balcao</option>
+                        </select>
+                        <button id="close-ticket-button" class="primary" type="button">Fechar conta</button>
+                    </div>
+                </div>
                 <div id="ticket-lines" class="ticket-lines" style="margin-top: 1rem;"></div>
                 <h3 style="margin-top: 1.4rem;">Resposta tecnica</h3>
                 <pre id="technical-response">Carregando...</pre>
@@ -338,6 +400,10 @@
         const selectedTableLabel = document.getElementById('selected-table-label');
         const productsCaption = document.getElementById('products-caption');
         const technicalResponse = document.getElementById('technical-response');
+        const discountInput = document.getElementById('discount-input');
+        const ownerCredentialsCard = document.getElementById('owner-credentials-card');
+        const paymentMethodSelect = document.getElementById('payment-method-select');
+        const closeTicketButton = document.getElementById('close-ticket-button');
 
         function setMessage(text, type = '') {
             actionMessage.textContent = text || '';
@@ -394,6 +460,60 @@
                 card.innerHTML = `<div class="label">${item.label}</div><div class="value">${item.value}</div>`;
                 metrics.appendChild(card);
             });
+        }
+
+        function renderOwnerCard(ticketPayload) {
+            if (!state.selectedTableId) {
+                ownerCredentialsCard.innerHTML = '<div class="muted">Selecione uma mesa para ver as credenciais operacionais.</div>';
+                return;
+            }
+
+            const owner = ticketPayload?.owner || state.user;
+            const permissions = ticketPayload?.permissions || { can_manage: true, can_close: true, is_owner: true };
+            const title = ticketPayload
+                ? 'Credenciais da venda em curso'
+                : 'Credenciais que serao usadas ao abrir esta mesa';
+            const note = ticketPayload
+                ? (permissions.can_manage
+                    ? 'Voce pode alterar esta mesa porque e responsavel por ela ou possui perfil de gestao.'
+                    : 'Esta mesa esta bloqueada para alteracoes por outro colaborador. Apenas a chefia, o administrador ou o responsavel podem mexer nela.')
+                : 'A primeira venda aberta nesta mesa ficara vinculada a estas credenciais.';
+
+            ownerCredentialsCard.innerHTML = `
+                <div class="label">${title}</div>
+                <div class="value">${owner?.name || 'Sem responsavel definido'}</div>
+                <div class="muted" style="margin-top:0.35rem;">${note}</div>
+                <div class="credentials-grid">
+                    <div class="credential-box">
+                        <div class="label">Utilizador</div>
+                        <div class="value">${owner?.access_code || owner?.email || '-'}</div>
+                    </div>
+                    <div class="credential-box">
+                        <div class="label">Senha</div>
+                        <div class="value">${owner?.pin_code || 'Nao disponivel'}</div>
+                    </div>
+                </div>
+                <div class="chips" style="margin-top:0.8rem;">
+                    <span class="chip">Perfil ${owner?.role || '-'}</span>
+                    <span class="chip">Email ${owner?.email || '-'}</span>
+                </div>
+            `;
+        }
+
+        function canManageSelectedTicket() {
+            return !state.currentTicket || state.currentTicket.permissions?.can_manage !== false;
+        }
+
+        function syncActionState() {
+            const hasTicket = Boolean(state.currentTicket);
+            const canManage = canManageSelectedTicket();
+            const canClose = state.currentTicket?.permissions?.can_close !== false;
+
+            discountInput.disabled = !hasTicket || !canManage;
+            document.getElementById('apply-discount-button').disabled = !hasTicket || !canManage;
+            document.getElementById('clear-discount-button').disabled = !hasTicket || !canManage;
+            paymentMethodSelect.disabled = !hasTicket || !canClose;
+            closeTicketButton.disabled = !hasTicket || !canClose;
         }
 
         function renderCategories() {
@@ -454,7 +574,7 @@
             category.products.forEach((product) => {
                 const card = document.createElement('article');
                 card.className = 'product-card';
-                const disabled = !state.selectedTableId || product.stock_status === 'out_of_stock';
+                const disabled = !state.selectedTableId || product.stock_status === 'out_of_stock' || !canManageSelectedTicket();
                 card.innerHTML = `
                     <figure>${product.image_url ? `<img src="${product.image_url}" alt="${product.name}">` : '<span>Sem imagem</span>'}</figure>
                     <div class="product-body">
@@ -488,15 +608,21 @@
             ticketLines.innerHTML = '';
 
             if (!ticketPayload) {
+                renderOwnerCard(null);
+                syncActionState();
                 ticketSummary.innerHTML = '<div class="empty" style="grid-column:1 / -1;">Nenhum ticket aberto nesta mesa ainda.</div>';
                 technicalResponse.textContent = JSON.stringify({ table, ticket: null }, null, 2);
                 return;
             }
 
+            renderOwnerCard(ticketPayload);
+
             const summaryCards = [
                 { label: 'Ticket', value: `#${ticketPayload.id}` },
                 { label: 'Status', value: ticketPayload.status },
                 { label: 'Colaborador', value: ticketPayload.collaborator || '-' },
+                { label: 'Subtotal', value: currency(ticketPayload.subtotal) },
+                { label: 'Desconto', value: currency(ticketPayload.discount_amount) },
                 { label: 'Total', value: currency(ticketPayload.total) },
             ];
 
@@ -512,15 +638,31 @@
             } else {
                 ticketPayload.items.forEach((item) => {
                     const line = document.createElement('div');
+                    const disableLineActions = !ticketPayload.permissions?.can_manage;
                     line.className = 'ticket-line';
                     line.innerHTML = `
                         <strong>${item.quantity}x ${item.name}</strong>
                         <div>Unitario: ${currency(item.unit_price)}</div>
                         <div>Total linha: ${currency(item.line_total)}</div>
+                        <div class="line-actions">
+                            <input class="qty-input" type="number" min="1" step="1" value="${item.quantity}" data-role="line-quantity" ${disableLineActions ? 'disabled' : ''}>
+                            <button class="secondary" type="button" data-role="update-item" ${disableLineActions ? 'disabled' : ''}>Atualizar</button>
+                            <button class="secondary" type="button" data-role="remove-item" ${disableLineActions ? 'disabled' : ''}>Remover</button>
+                        </div>
                     `;
+                    const quantityInput = line.querySelector('[data-role="line-quantity"]');
+                    line.querySelector('[data-role="update-item"]').addEventListener('click', async () => {
+                        await updateTicketItem(item.id, quantityInput.value);
+                    });
+                    line.querySelector('[data-role="remove-item"]').addEventListener('click', async () => {
+                        await removeTicketItem(item.id);
+                    });
                     ticketLines.appendChild(line);
                 });
             }
+
+            discountInput.value = ticketPayload.discount_amount || 0;
+            syncActionState();
 
             technicalResponse.textContent = JSON.stringify({ table, ticket: ticketPayload }, null, 2);
         }
@@ -529,6 +671,9 @@
             const response = await authorizedFetch(`/api/colaborador/tables/${tableId}/ticket`);
             const data = await response.json();
             state.currentTicket = data.ticket;
+            if (data.selected_user) {
+                state.user = data.selected_user;
+            }
             renderTicket(data.ticket);
         }
 
@@ -559,6 +704,110 @@
             await refreshTables();
         }
 
+        async function updateTicketItem(itemId, quantity) {
+            if (!state.selectedTableId) {
+                setMessage('Selecione primeiro uma mesa.', 'error');
+                return;
+            }
+
+            const response = await authorizedFetch(
+                `/api/colaborador/tables/${state.selectedTableId}/ticket/items/${itemId}`,
+                {
+                    method: 'PUT',
+                    body: JSON.stringify({ quantity }),
+                }
+            );
+            const data = await response.json();
+
+            if (!response.ok) {
+                const error = data.errors ? Object.values(data.errors)[0] : data.message;
+                setMessage(error || 'Falha ao atualizar item.', 'error');
+                return;
+            }
+
+            state.currentTicket = data.ticket;
+            setMessage(data.message, 'success');
+            renderTicket(data.ticket);
+            await refreshTables();
+        }
+
+        async function removeTicketItem(itemId) {
+            if (!state.selectedTableId) {
+                setMessage('Selecione primeiro uma mesa.', 'error');
+                return;
+            }
+
+            const response = await authorizedFetch(
+                `/api/colaborador/tables/${state.selectedTableId}/ticket/items/${itemId}`,
+                { method: 'DELETE' }
+            );
+            const data = await response.json();
+
+            if (!response.ok) {
+                const error = data.errors ? Object.values(data.errors)[0] : data.message;
+                setMessage(error || 'Falha ao remover item.', 'error');
+                return;
+            }
+
+            state.currentTicket = data.ticket;
+            setMessage(data.message, 'success');
+            renderTicket(data.ticket);
+            await refreshTables();
+        }
+
+        async function applyDiscount(amount) {
+            if (!state.selectedTableId) {
+                setMessage('Selecione primeiro uma mesa.', 'error');
+                return;
+            }
+
+            const response = await authorizedFetch(
+                `/api/colaborador/tables/${state.selectedTableId}/ticket/discount`,
+                {
+                    method: 'PUT',
+                    body: JSON.stringify({ discount_amount: amount }),
+                }
+            );
+            const data = await response.json();
+
+            if (!response.ok) {
+                const error = data.errors ? Object.values(data.errors)[0] : data.message;
+                setMessage(error || 'Falha ao atualizar desconto.', 'error');
+                return;
+            }
+
+            state.currentTicket = data.ticket;
+            setMessage(data.message, 'success');
+            renderTicket(data.ticket);
+            await refreshTables();
+        }
+
+        async function closeTicket() {
+            if (!state.selectedTableId) {
+                setMessage('Selecione primeiro uma mesa.', 'error');
+                return;
+            }
+
+            const response = await authorizedFetch(
+                `/api/colaborador/tables/${state.selectedTableId}/ticket/close`,
+                {
+                    method: 'PUT',
+                    body: JSON.stringify({ payment_method: paymentMethodSelect.value }),
+                }
+            );
+            const data = await response.json();
+
+            if (!response.ok) {
+                const error = data.errors ? Object.values(data.errors)[0] : data.message;
+                setMessage(error || 'Falha ao fechar a conta.', 'error');
+                return;
+            }
+
+            state.currentTicket = null;
+            setMessage(data.message, 'success');
+            await refreshTables();
+        }
+
         async function refreshTables() {
             const bootstrapResponse = await authorizedFetch('/api/colaborador/ordering/bootstrap');
             const bootstrapData = await bootstrapResponse.json();
@@ -585,6 +834,11 @@
             } else {
                 renderTicket(null);
             }
+
+            if (!state.selectedTableId) {
+                renderOwnerCard(null);
+                syncActionState();
+            }
         }
 
         document.getElementById('logout-button').addEventListener('click', () => {
@@ -594,6 +848,9 @@
         });
 
         document.getElementById('refresh-button').addEventListener('click', refreshTables);
+        document.getElementById('apply-discount-button').addEventListener('click', () => applyDiscount(discountInput.value));
+        document.getElementById('clear-discount-button').addEventListener('click', () => applyDiscount(0));
+        closeTicketButton.addEventListener('click', closeTicket);
 
         refreshTables();
         setInterval(refreshTables, 20000);
