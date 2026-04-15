@@ -47,6 +47,9 @@ def ensure_database_schema():
 
     if "orders" in tables:
         columns = {column["name"] for column in inspector.get_columns("orders")}
+        if "sale_pin_code" not in columns:
+            db.session.execute(text("ALTER TABLE orders ADD COLUMN sale_pin_code VARCHAR(4)"))
+            db.session.commit()
         if "subtotal" not in columns:
             db.session.execute(
                 text("ALTER TABLE orders ADD COLUMN subtotal NUMERIC(10, 2) DEFAULT 0.00 NOT NULL")

@@ -50,10 +50,15 @@ def login_page():
 
 @main_blueprint.get("/colaborador")
 def collaborator_page():
+    return redirect(url_for("main.operations_page"))
+
+
+@main_blueprint.get("/operacao")
+def operations_page():
     return render_template(
         "collaborator_panel.html",
         app_name=current_app.config["APP_NAME"],
-        page_title="Painel do Colaborador",
+        page_title="Tela Central de Vendas",
     )
 
 

@@ -1,7 +1,8 @@
 from decimal import Decimal
+import random
 
 from app.db import db
-from app.models import DiningTable, MenuCategory, MenuProduct, Order, OrderItem, Payment, utcnow
+from app.models import Collaborator, DiningTable, MenuCategory, MenuProduct, Order, OrderItem, Payment, utcnow
 
 
 OPEN_ORDER_STATUSES = {"aberto", "confirmado", "preparando", "pronto", "entregue"}
@@ -46,6 +47,8 @@ def _current_open_order_for_table(table_id):
 
 def _table_status_payload(table):
     open_order = _current_open_order_for_table(table.id)
+    if open_order is not None:
+        _ensure_sale_pin(open_order)
     return {
         "id": table.id,
         "number": table.number,
@@ -54,6 +57,27 @@ def _table_status_payload(table):
         "has_open_ticket": open_order is not None,
         "ticket": open_order.to_dict() if open_order else None,
     }
+
+
+def _active_floor_chief_payload():
+    floor_chief = (
+        Collaborator.query.filter_by(role="chefe_sala", active=True)
+        .order_by(Collaborator.name.asc())
+        .first()
+    )
+    return floor_chief.to_public_dict() if floor_chief else None
+
+
+def generate_sale_pin():
+    return f"{random.randint(0, 9999):04d}"
+
+
+def _ensure_sale_pin(ticket):
+    if ticket is None or ticket.sale_pin_code:
+        return False
+    ticket.sale_pin_code = generate_sale_pin()
+    db.session.commit()
+    return True
 
 
 def can_manage_ticket(collaborator, ticket):
@@ -74,6 +98,7 @@ def _ticket_permissions_payload(collaborator, ticket):
 
 
 def _ticket_payload(ticket, collaborator):
+    _ensure_sale_pin(ticket)
     payload = ticket.to_dict()
     payload["permissions"] = _ticket_permissions_payload(collaborator, ticket)
     return payload
@@ -82,7 +107,8 @@ def _ticket_payload(ticket, collaborator):
 def get_collaborator_ordering_bootstrap(collaborator):
     tables = DiningTable.query.filter_by(active=True).order_by(DiningTable.number.asc()).all()
     return {
-        "user": collaborator.to_public_dict(include_pin=True),
+        "user": collaborator.to_public_dict(),
+        "floor_chief": _active_floor_chief_payload(),
         "categories": _active_categories_with_products(),
         "tables": [_table_status_payload(table) for table in tables],
     }
@@ -94,7 +120,8 @@ def get_table_ticket(table_id, collaborator):
     return {
         "table": table.to_dict(),
         "ticket": _ticket_payload(ticket, collaborator) if ticket else None,
-        "selected_user": collaborator.to_public_dict(include_pin=True) if collaborator else None,
+        "selected_user": collaborator.to_public_dict() if collaborator else None,
+        "floor_chief": _active_floor_chief_payload(),
     }
 
 
@@ -151,6 +178,7 @@ def add_product_to_table_ticket(collaborator, table_id, product_id, quantity=1):
             collaborator=collaborator,
             status="aberto",
             notes="Pedido iniciado pelo painel do colaborador.",
+            sale_pin_code=generate_sale_pin(),
         )
         db.session.add(ticket)
         db.session.flush()

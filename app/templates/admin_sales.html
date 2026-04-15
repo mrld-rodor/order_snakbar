@@ -30,7 +30,7 @@
             text-decoration: none; color: var(--text); background: var(--accent-soft); padding: 0.7rem 1rem;
             border-radius: 999px; font-weight: 700;
         }
-        .admin-nav a:first-child { background: linear-gradient(135deg, var(--accent), #79411f); color: white; }
+        .admin-nav a:nth-child(2) { background: linear-gradient(135deg, var(--accent), #79411f); color: white; }
         .card {
             background: var(--panel); border: 1px solid var(--border); border-radius: 24px; padding: 1.35rem;
             box-shadow: 0 22px 48px rgba(68, 41, 26, 0.08);
@@ -60,7 +60,7 @@
             <div>
                 <p>{{ app_name }}</p>
                 <h1>{{ page_title }}</h1>
-                <p>Visao comercial com estoque, giro de produtos e desempenho de vendas em atualizacao periodica.</p>
+                <p>Visao comercial com estoque, giro de produtos, mesas abertas e credenciais temporarias da operacao central.</p>
             </div>
             <button id="logout-button" type="button">Sair</button>
         </div>
@@ -104,6 +104,11 @@
         </div>
 
         <section class="card" style="margin-top:1rem;">
+            <h2 style="margin-top:0;">Mesas abertas e credenciais da venda</h2>
+            <div id="open-tables" class="lists"></div>
+        </section>
+
+        <section class="card" style="margin-top:1rem;">
             <h2 style="margin-top:0;">Resposta tecnica</h2>
             <pre id="technical-response">Carregando...</pre>
         </section>
@@ -120,6 +125,7 @@
         const categoryStock = document.getElementById('category-stock');
         const stockAlerts = document.getElementById('stock-alerts');
         const recentOrders = document.getElementById('recent-orders');
+        const openTables = document.getElementById('open-tables');
         const technicalResponse = document.getElementById('technical-response');
 
         async function authorizedFetch(url) {
@@ -214,6 +220,15 @@
                 <div>Total: ${currency(item.total)}</div>
                 <div>Status: ${item.status}</div>
             `, 'Sem pedidos recentes.');
+
+            renderList(openTables, data.open_tables, (item) => `
+                <strong>Mesa ${item.table_number} | Pedido #${item.id}</strong>
+                <div>Responsavel: ${item.collaborator || 'Nao atribuido'}</div>
+                <div>Utilizador da venda: ${item.sale_credentials?.username || '-'}</div>
+                <div>Senha temporaria: ${item.sale_credentials?.password || '-'}</div>
+                <div>Total parcial: ${currency(item.total)}</div>
+                <div>Status: ${item.status}</div>
+            `, 'Nenhuma mesa aberta neste momento.');
 
             technicalResponse.textContent = JSON.stringify(data, null, 2);
         }

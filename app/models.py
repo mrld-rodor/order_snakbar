@@ -161,6 +161,7 @@ class Order(db.Model):
     collaborator_id = db.Column(db.Integer, db.ForeignKey("collaborators.id"), nullable=False)
     status = db.Column(db.String(30), nullable=False, default="aberto")
     notes = db.Column(db.String(255))
+    sale_pin_code = db.Column(db.String(4))
     subtotal = db.Column(db.Numeric(10, 2), nullable=False, default=Decimal("0.00"))
     discount_amount = db.Column(db.Numeric(10, 2), nullable=False, default=Decimal("0.00"))
     total = db.Column(db.Numeric(10, 2), nullable=False, default=Decimal("0.00"))
@@ -194,13 +195,18 @@ class Order(db.Model):
         self.total = (subtotal - discount_amount).quantize(Decimal("0.01"))
 
     def to_dict(self):
+        owner_payload = self.collaborator.to_public_dict() if self.collaborator else None
         return {
             "id": self.id,
             "table_id": self.table_id,
             "table_number": self.table.number if self.table else None,
             "collaborator_id": self.collaborator_id,
             "collaborator": self.collaborator.name if self.collaborator else None,
-            "owner": self.collaborator.to_public_dict(include_pin=True) if self.collaborator else None,
+            "owner": owner_payload,
+            "sale_credentials": {
+                "username": self.collaborator.access_code if self.collaborator and self.collaborator.access_code else (self.collaborator.email if self.collaborator else None),
+                "password": self.sale_pin_code,
+            },
             "status": self.status,
             "notes": self.notes,
             "subtotal": float(self.subtotal),

@@ -282,7 +282,225 @@
         .message.success { color: var(--success); }
         .message.error { color: var(--danger); }
 
+        .message.warning { color: #8a5a12; }
+
         .muted { color: var(--muted); }
+
+        .terminal-shell {
+            margin-top: 1rem;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid #251c17;
+            background: linear-gradient(180deg, #31241d, #1c1410);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 34px rgba(28, 20, 16, 0.28);
+        }
+
+        .terminal-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.85rem 1rem;
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            color: #f8ebde;
+        }
+
+        .terminal-screen {
+            padding: 1rem;
+            background: linear-gradient(180deg, #0f1515, #15201c);
+            color: #bff9d3;
+            font-family: "Courier New", monospace;
+            display: grid;
+            gap: 0.9rem;
+        }
+
+        .terminal-led {
+            display: inline-flex;
+            width: 0.7rem;
+            height: 0.7rem;
+            border-radius: 50%;
+            background: #64db88;
+            box-shadow: 0 0 10px rgba(100, 219, 136, 0.8);
+        }
+
+        .terminal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .terminal-box {
+            border: 1px solid rgba(191, 249, 211, 0.22);
+            border-radius: 14px;
+            padding: 0.85rem;
+            background: rgba(10, 18, 15, 0.68);
+        }
+
+        .terminal-label {
+            color: #7ddfa3;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.4rem;
+        }
+
+        .terminal-value {
+            color: #f2fff6;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .terminal-subvalue {
+            margin-top: 0.35rem;
+            color: #b7e8c8;
+            font-size: 0.88rem;
+        }
+
+        .ticket-register {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .ticket-line {
+            display: grid;
+            gap: 0.7rem;
+            padding: 0.95rem 1rem;
+            border-radius: 18px;
+            background: #fffaf4;
+        }
+
+        .ticket-line-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            align-items: start;
+        }
+
+        .ticket-line-meta {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .register-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+        }
+
+        .register-button {
+            width: 2.3rem;
+            height: 2.3rem;
+            border: 0;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font: inherit;
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+        }
+
+        .register-button.subtle {
+            background: #eadccf;
+            color: var(--text);
+        }
+
+        .register-button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .toast-stack {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            display: grid;
+            gap: 0.75rem;
+            z-index: 80;
+        }
+
+        .toast {
+            min-width: 280px;
+            max-width: 360px;
+            padding: 0.95rem 1rem;
+            border-radius: 16px;
+            box-shadow: 0 18px 34px rgba(34, 24, 18, 0.18);
+            border: 1px solid var(--border);
+            background: #fff;
+            color: var(--text);
+        }
+
+        .toast.success {
+            border-color: rgba(42, 106, 63, 0.18);
+            background: #f0fbf4;
+        }
+
+        .toast.error {
+            border-color: rgba(161, 54, 43, 0.18);
+            background: #fff4f2;
+        }
+
+        .toast.warning {
+            border-color: rgba(138, 90, 18, 0.18);
+            background: #fff9ee;
+        }
+
+        .warning-banner {
+            display: none;
+            margin-top: 1rem;
+            padding: 0.95rem 1rem;
+            border-radius: 18px;
+            border: 1px solid #e6cf9c;
+            background: #fff7e3;
+            color: #6e4b10;
+            font-weight: 600;
+        }
+
+        .warning-banner.visible {
+            display: block;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(44, 34, 27, 0.46);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 50;
+        }
+
+        .modal-overlay.visible {
+            display: flex;
+        }
+
+        .modal-card {
+            width: min(100%, 460px);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 1.35rem;
+            box-shadow: 0 22px 48px rgba(68, 41, 26, 0.18);
+        }
+
+        .modal-details {
+            display: grid;
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
 
         .empty {
             border: 1px dashed var(--border);
@@ -311,7 +529,7 @@
             <div>
                 <p>{{ app_name }}</p>
                 <h1>{{ page_title }}</h1>
-                <p class="muted">Escolha a mesa, acompanhe o consumo atual, aplique descontos e ajuste itens da conta em tempo real.</p>
+                <p class="muted">Tela central da operacao: escolha a mesa, valide a credencial do responsavel, continue a venda ou lance novos pedidos em tempo real.</p>
             </div>
             <div class="topbar-actions">
                 <button id="refresh-button" type="button" class="secondary">Atualizar</button>
@@ -341,6 +559,7 @@
                         <div id="products-caption" class="muted">Selecione uma categoria e uma mesa para comecar.</div>
                     </div>
                 </div>
+                <div id="table-warning-banner" class="warning-banner"></div>
                 <div id="products-grid" class="products-grid"></div>
                 <div id="action-message" class="message"></div>
             </section>
@@ -348,7 +567,16 @@
             <section class="card">
                 <h2 class="section-title">Ticket da mesa</h2>
                 <div id="selected-table-label" class="muted">Nenhuma mesa selecionada.</div>
-                <div id="owner-credentials-card" class="credentials-card"></div>
+                <div class="terminal-shell">
+                    <div class="terminal-topbar">
+                        <div style="display:flex; align-items:center; gap:0.65rem;">
+                            <span class="terminal-led"></span>
+                            <strong>Terminal da Mesa</strong>
+                        </div>
+                        <div id="terminal-status" style="font-size:0.88rem; color:#d8f6e2;">Aguardando selecao</div>
+                    </div>
+                    <div id="owner-credentials-card" class="terminal-screen"></div>
+                </div>
                 <div id="ticket-summary" class="summary-grid" style="margin-top: 1rem;"></div>
                 <div class="ticket-controls">
                     <div class="inline-form">
@@ -373,6 +601,21 @@
                 <pre id="technical-response">Carregando...</pre>
             </section>
         </div>
+
+        <div id="add-confirmation-modal" class="modal-overlay" aria-hidden="true">
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="add-confirmation-title">
+                <div class="label">Confirmacao de lancamento</div>
+                <h2 id="add-confirmation-title" class="section-title">Adicionar produto na conta</h2>
+                <div id="add-confirmation-message" class="muted">Revise os dados antes de confirmar.</div>
+                <div id="add-confirmation-details" class="modal-details"></div>
+                <div class="modal-actions">
+                    <button id="cancel-add-button" class="secondary" type="button">Cancelar</button>
+                    <button id="confirm-add-button" class="primary" type="button">Confirmar lancamento</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast-stack" class="toast-stack"></div>
     </div>
 
     <script>
@@ -388,6 +631,8 @@
             selectedCategoryId: null,
             selectedTableId: null,
             currentTicket: null,
+            pendingAdd: null,
+            floorChief: null,
         };
 
         const metrics = document.getElementById('metrics');
@@ -404,13 +649,39 @@
         const ownerCredentialsCard = document.getElementById('owner-credentials-card');
         const paymentMethodSelect = document.getElementById('payment-method-select');
         const closeTicketButton = document.getElementById('close-ticket-button');
+        const tableWarningBanner = document.getElementById('table-warning-banner');
+        const terminalStatus = document.getElementById('terminal-status');
+        const addConfirmationModal = document.getElementById('add-confirmation-modal');
+        const addConfirmationMessage = document.getElementById('add-confirmation-message');
+        const addConfirmationDetails = document.getElementById('add-confirmation-details');
+        const confirmAddButton = document.getElementById('confirm-add-button');
+        const cancelAddButton = document.getElementById('cancel-add-button');
+        const toastStack = document.getElementById('toast-stack');
 
-        function setMessage(text, type = '') {
+        function setMessage(text, type = '', showToast = true) {
             actionMessage.textContent = text || '';
             actionMessage.className = 'message';
             if (type) {
                 actionMessage.classList.add(type);
             }
+            if (text && showToast) {
+                pushToast(text, type || 'success');
+            }
+        }
+
+        function pushToast(text, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = text;
+            toastStack.appendChild(toast);
+            window.setTimeout(() => {
+                toast.remove();
+            }, 3200);
+        }
+
+        function setTableWarning(text = '') {
+            tableWarningBanner.textContent = text;
+            tableWarningBanner.classList.toggle('visible', Boolean(text));
         }
 
         function currency(value) {
@@ -418,6 +689,65 @@
                 style: 'currency',
                 currency: 'EUR',
             }).format(value || 0);
+        }
+
+        function selectedTable() {
+            return state.tables.find((table) => table.id === state.selectedTableId) || null;
+        }
+
+        function closeAddConfirmation() {
+            state.pendingAdd = null;
+            addConfirmationModal.classList.remove('visible');
+            addConfirmationModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function openAddConfirmation(product, quantity) {
+            const table = selectedTable();
+            const parsedQuantity = Number.parseInt(quantity, 10);
+
+            if (!table) {
+                setMessage('Selecione primeiro uma mesa.', 'error');
+                return;
+            }
+
+            if (!Number.isInteger(parsedQuantity) || parsedQuantity <= 0) {
+                setMessage('Informe uma quantidade valida maior que zero.', 'error');
+                return;
+            }
+
+            state.pendingAdd = {
+                productId: product.id,
+                productName: product.name,
+                quantity: parsedQuantity,
+                unitPrice: product.price,
+                tableNumber: table.number,
+                categoryName: currentCategory()?.name || '-',
+            };
+
+            addConfirmationMessage.textContent = `Mesa ${table.number}: confirme o produto e a quantidade antes de lancar na conta.`;
+            addConfirmationDetails.innerHTML = `
+                <div class="credential-box">
+                    <div class="label">Produto</div>
+                    <div class="value">${state.pendingAdd.productName}</div>
+                </div>
+                <div class="credentials-grid">
+                    <div class="credential-box">
+                        <div class="label">Quantidade</div>
+                        <div class="value">${state.pendingAdd.quantity}</div>
+                    </div>
+                    <div class="credential-box">
+                        <div class="label">Valor estimado</div>
+                        <div class="value">${currency(state.pendingAdd.unitPrice * state.pendingAdd.quantity)}</div>
+                    </div>
+                </div>
+                <div class="chips">
+                    <span class="chip">Mesa ${state.pendingAdd.tableNumber}</span>
+                    <span class="chip">Categoria ${state.pendingAdd.categoryName}</span>
+                </div>
+            `;
+
+            addConfirmationModal.classList.add('visible');
+            addConfirmationModal.setAttribute('aria-hidden', 'false');
         }
 
         async function authorizedFetch(url, options = {}) {
@@ -448,7 +778,7 @@
             metrics.innerHTML = '';
             const occupiedTables = state.tables.filter((table) => table.has_open_ticket).length;
             const cards = [
-                { label: 'Colaborador', value: state.user?.name || 'Carregando...' },
+                { label: 'Operador logado', value: state.user?.name || 'Carregando...' },
                 { label: 'Mesas ativas', value: state.tables.length },
                 { label: 'Mesas com ticket aberto', value: occupiedTables },
                 { label: 'Categorias disponiveis', value: state.categories.length },
@@ -464,38 +794,52 @@
 
         function renderOwnerCard(ticketPayload) {
             if (!state.selectedTableId) {
-                ownerCredentialsCard.innerHTML = '<div class="muted">Selecione uma mesa para ver as credenciais operacionais.</div>';
+                terminalStatus.textContent = 'Aguardando selecao';
+                ownerCredentialsCard.innerHTML = '<div class="terminal-box"><div class="terminal-label">Sistema</div><div class="terminal-value">Selecione uma mesa para abrir o terminal operacional.</div></div>';
                 return;
             }
 
             const owner = ticketPayload?.owner || state.user;
+            const floorChief = state.floorChief;
+            const saleCredentials = ticketPayload?.sale_credentials || {
+                username: state.user?.access_code || state.user?.email || '-',
+                password: 'Gerada ao abrir a venda',
+            };
             const permissions = ticketPayload?.permissions || { can_manage: true, can_close: true, is_owner: true };
-            const title = ticketPayload
-                ? 'Credenciais da venda em curso'
-                : 'Credenciais que serao usadas ao abrir esta mesa';
             const note = ticketPayload
                 ? (permissions.can_manage
-                    ? 'Voce pode alterar esta mesa porque e responsavel por ela ou possui perfil de gestao.'
+                    ? 'Voce pode continuar esta venda porque e o responsavel pela mesa ou possui perfil de gestao.'
                     : 'Esta mesa esta bloqueada para alteracoes por outro colaborador. Apenas a chefia, o administrador ou o responsavel podem mexer nela.')
-                : 'A primeira venda aberta nesta mesa ficara vinculada a estas credenciais.';
+                : 'A primeira venda aberta nesta mesa ficara vinculada a estas credenciais e sera contabilizada para as metricas do responsavel.';
+
+            terminalStatus.textContent = ticketPayload ? `Mesa ${ticketPayload.table_number} em operacao` : `Mesa ${selectedTable()?.number} pronta para abrir`;
 
             ownerCredentialsCard.innerHTML = `
-                <div class="label">${title}</div>
-                <div class="value">${owner?.name || 'Sem responsavel definido'}</div>
-                <div class="muted" style="margin-top:0.35rem;">${note}</div>
-                <div class="credentials-grid">
-                    <div class="credential-box">
-                        <div class="label">Utilizador</div>
-                        <div class="value">${owner?.access_code || owner?.email || '-'}</div>
+                <div class="terminal-box">
+                    <div class="terminal-label">Leitura Operacional</div>
+                    <div class="terminal-value">${note}</div>
+                </div>
+                <div class="terminal-grid">
+                    <div class="terminal-box">
+                        <div class="terminal-label">Chefe de Sala</div>
+                        <div class="terminal-value">${floorChief?.name || 'Nao definido'}</div>
+                        <div class="terminal-subvalue">${floorChief?.access_code || floorChief?.email || 'Sem credencial ativa'}</div>
                     </div>
-                    <div class="credential-box">
-                        <div class="label">Senha</div>
-                        <div class="value">${owner?.pin_code || 'Nao disponivel'}</div>
+                    <div class="terminal-box">
+                        <div class="terminal-label">Responsavel da Mesa</div>
+                        <div class="terminal-value">${owner?.name || 'Sem responsavel definido'}</div>
+                        <div class="terminal-subvalue">${owner?.access_code || owner?.email || '-'}</div>
                     </div>
                 </div>
-                <div class="chips" style="margin-top:0.8rem;">
-                    <span class="chip">Perfil ${owner?.role || '-'}</span>
-                    <span class="chip">Email ${owner?.email || '-'}</span>
+                <div class="terminal-grid">
+                    <div class="terminal-box">
+                        <div class="terminal-label">Utilizador da Venda</div>
+                        <div class="terminal-value">${saleCredentials.username || '-'}</div>
+                    </div>
+                    <div class="terminal-box">
+                        <div class="terminal-label">Senha Temporaria</div>
+                        <div class="terminal-value">${saleCredentials.password || 'Nao disponivel'}</div>
+                    </div>
                 </div>
             `;
         }
@@ -556,15 +900,26 @@
         function renderProducts() {
             productsGrid.innerHTML = '';
             const category = currentCategory();
+            const ticket = state.currentTicket;
+            const ownerName = ticket?.owner?.name || 'outro colaborador';
+
             if (!category) {
+                setTableWarning('');
                 productsGrid.innerHTML = '<div class="empty">Selecione um subgrupo do cardapio.</div>';
                 productsCaption.textContent = 'Selecione uma categoria e uma mesa para comecar.';
                 return;
             }
 
-            productsCaption.textContent = state.selectedTableId
-                ? `Mesa selecionada pronta para lancamento em ${category.name}.`
-                : `Escolha uma mesa para adicionar itens de ${category.name}.`;
+            if (!state.selectedTableId) {
+                setTableWarning('');
+                productsCaption.textContent = `Escolha uma mesa para adicionar itens de ${category.name}.`;
+            } else if (ticket && ticket.permissions?.can_manage === false) {
+                setTableWarning(`Mesa bloqueada para alteracoes: ${ownerName} iniciou esta venda. Apenas o responsavel, a chefia ou o administrador podem mexer nesta conta.`);
+                productsCaption.textContent = `Mesa ${selectedTable()?.number} esta apenas para consulta em ${category.name}.`;
+            } else {
+                setTableWarning('');
+                productsCaption.textContent = `Mesa selecionada pronta para lancamento em ${category.name}.`;
+            }
 
             if (!category.products.length) {
                 productsGrid.innerHTML = '<div class="empty">Nao ha produtos ativos nesta categoria.</div>';
@@ -595,7 +950,7 @@
                 const quantityInput = card.querySelector('[data-role="quantity"]');
                 const addButton = card.querySelector('button');
                 addButton.addEventListener('click', async () => {
-                    await addProductToTicket(product.id, quantityInput.value);
+                    openAddConfirmation(product, quantityInput.value);
                 });
                 productsGrid.appendChild(card);
             });
@@ -610,12 +965,16 @@
             if (!ticketPayload) {
                 renderOwnerCard(null);
                 syncActionState();
+                setTableWarning('');
                 ticketSummary.innerHTML = '<div class="empty" style="grid-column:1 / -1;">Nenhum ticket aberto nesta mesa ainda.</div>';
                 technicalResponse.textContent = JSON.stringify({ table, ticket: null }, null, 2);
                 return;
             }
 
             renderOwnerCard(ticketPayload);
+            if (ticketPayload.permissions?.can_manage === false) {
+                setMessage(`Mesa ${ticketPayload.table_number} em consulta: ${ticketPayload.owner?.name || 'Outro colaborador'} abriu esta venda.`, 'warning', false);
+            }
 
             const summaryCards = [
                 { label: 'Ticket', value: `#${ticketPayload.id}` },
@@ -641,21 +1000,23 @@
                     const disableLineActions = !ticketPayload.permissions?.can_manage;
                     line.className = 'ticket-line';
                     line.innerHTML = `
-                        <strong>${item.quantity}x ${item.name}</strong>
-                        <div>Unitario: ${currency(item.unit_price)}</div>
-                        <div>Total linha: ${currency(item.line_total)}</div>
-                        <div class="line-actions">
-                            <input class="qty-input" type="number" min="1" step="1" value="${item.quantity}" data-role="line-quantity" ${disableLineActions ? 'disabled' : ''}>
-                            <button class="secondary" type="button" data-role="update-item" ${disableLineActions ? 'disabled' : ''}>Atualizar</button>
-                            <button class="secondary" type="button" data-role="remove-item" ${disableLineActions ? 'disabled' : ''}>Remover</button>
+                        <div class="ticket-line-top">
+                            <div>
+                                <strong>${item.name}</strong>
+                                <div class="ticket-line-meta">Unitario: ${currency(item.unit_price)} | Total: ${currency(item.line_total)}</div>
+                            </div>
+                            <div class="register-actions">
+                                <button class="register-button subtle" type="button" data-role="decrement-item" ${disableLineActions ? 'disabled' : ''}>-</button>
+                                <div class="qty-input" style="display:inline-flex; align-items:center; justify-content:center;">${item.quantity}</div>
+                                <button class="register-button" type="button" data-role="increment-item" ${disableLineActions ? 'disabled' : ''}>+</button>
+                            </div>
                         </div>
                     `;
-                    const quantityInput = line.querySelector('[data-role="line-quantity"]');
-                    line.querySelector('[data-role="update-item"]').addEventListener('click', async () => {
-                        await updateTicketItem(item.id, quantityInput.value);
+                    line.querySelector('[data-role="increment-item"]').addEventListener('click', async () => {
+                        await incrementTicketItem(item);
                     });
-                    line.querySelector('[data-role="remove-item"]').addEventListener('click', async () => {
-                        await removeTicketItem(item.id);
+                    line.querySelector('[data-role="decrement-item"]').addEventListener('click', async () => {
+                        await decrementTicketItem(item);
                     });
                     ticketLines.appendChild(line);
                 });
@@ -673,6 +1034,9 @@
             state.currentTicket = data.ticket;
             if (data.selected_user) {
                 state.user = data.selected_user;
+            }
+            if (data.floor_chief) {
+                state.floorChief = data.floor_chief;
             }
             renderTicket(data.ticket);
         }
@@ -704,7 +1068,17 @@
             await refreshTables();
         }
 
-        async function updateTicketItem(itemId, quantity) {
+        async function confirmPendingAdd() {
+            if (!state.pendingAdd) {
+                closeAddConfirmation();
+                return;
+            }
+
+            await addProductToTicket(state.pendingAdd.productId, state.pendingAdd.quantity);
+            closeAddConfirmation();
+        }
+
+        async function updateTicketItem(itemId, quantity, successMessage = 'Item atualizado com sucesso.') {
             if (!state.selectedTableId) {
                 setMessage('Selecione primeiro uma mesa.', 'error');
                 return;
@@ -726,12 +1100,25 @@
             }
 
             state.currentTicket = data.ticket;
-            setMessage(data.message, 'success');
+            setMessage(successMessage || data.message, 'success');
             renderTicket(data.ticket);
             await refreshTables();
         }
 
-        async function removeTicketItem(itemId) {
+        async function incrementTicketItem(item) {
+            await updateTicketItem(item.id, item.quantity + 1, `${item.name}: quantidade aumentada para ${item.quantity + 1}.`);
+        }
+
+        async function decrementTicketItem(item) {
+            if (item.quantity <= 1) {
+                await removeTicketItem(item.id, `${item.name} removido da conta da mesa.`);
+                return;
+            }
+
+            await updateTicketItem(item.id, item.quantity - 1, `${item.name}: quantidade reduzida para ${item.quantity - 1}.`);
+        }
+
+        async function removeTicketItem(itemId, successMessage = 'Item removido com sucesso.') {
             if (!state.selectedTableId) {
                 setMessage('Selecione primeiro uma mesa.', 'error');
                 return;
@@ -750,7 +1137,7 @@
             }
 
             state.currentTicket = data.ticket;
-            setMessage(data.message, 'success');
+            setMessage(successMessage || data.message, 'success');
             renderTicket(data.ticket);
             await refreshTables();
         }
@@ -812,6 +1199,7 @@
             const bootstrapResponse = await authorizedFetch('/api/colaborador/ordering/bootstrap');
             const bootstrapData = await bootstrapResponse.json();
             state.user = bootstrapData.user;
+            state.floorChief = bootstrapData.floor_chief || null;
             state.categories = bootstrapData.categories;
             state.tables = bootstrapData.tables;
             if (!state.selectedCategoryId && state.categories.length) {
@@ -851,6 +1239,18 @@
         document.getElementById('apply-discount-button').addEventListener('click', () => applyDiscount(discountInput.value));
         document.getElementById('clear-discount-button').addEventListener('click', () => applyDiscount(0));
         closeTicketButton.addEventListener('click', closeTicket);
+        cancelAddButton.addEventListener('click', closeAddConfirmation);
+        confirmAddButton.addEventListener('click', confirmPendingAdd);
+        addConfirmationModal.addEventListener('click', (event) => {
+            if (event.target === addConfirmationModal) {
+                closeAddConfirmation();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && addConfirmationModal.classList.contains('visible')) {
+                closeAddConfirmation();
+            }
+        });
 
         refreshTables();
         setInterval(refreshTables, 20000);

@@ -4,6 +4,9 @@ from decimal import Decimal
 from app.models import Collaborator, MenuCategory, MenuProduct, Order
 
 
+OPEN_ORDER_STATUSES = ("aberto", "confirmado", "preparando", "pronto", "entregue")
+
+
 STAFF_ROLES = ("colaborador", "chefe_sala")
 
 
@@ -253,12 +256,18 @@ def get_product_dashboard(period):
     sales = get_sales_summary(period)
     inventory = get_inventory_overview()
     ranking = get_product_rankings(period)
+    open_orders = (
+        Order.query.filter(Order.status.in_(OPEN_ORDER_STATUSES))
+        .order_by(Order.opened_at.desc())
+        .all()
+    )
     return {
         "period": normalize_period(period),
         "sales": sales,
         "inventory": inventory,
         "top_products": ranking[:8],
         "category_stock": inventory["categories"],
+        "open_tables": [order.to_dict() for order in open_orders[:8]],
         "recent_orders": get_recent_orders(limit=8),
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }

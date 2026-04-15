@@ -67,10 +67,10 @@
             <div>
                 <p>{{ app_name }}</p>
                 <h1>{{ page_title }}</h1>
-                <p>Gestao da equipa, credenciais operacionais e acompanhamento de produtividade em tempo real.</p>
+                <p>Gestao da equipa e leitura individualizada de produtividade, desempenho e horarios de venda por colaborador.</p>
             </div>
             <div class="toolbar">
-                <a href="/colaborador" style="text-decoration:none;"><button class="secondary-button" type="button">Terminal de mesas</button></a>
+                <a href="/operacao" style="text-decoration:none;"><button class="secondary-button" type="button">Tela central</button></a>
                 <button id="logout-button" type="button">Sair</button>
             </div>
         </div>
@@ -84,7 +84,7 @@
                 <div style="display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1rem;">
                     <div>
                         <h2 style="margin:0;">Cadastro de equipa</h2>
-                        <p style="margin:0.3rem 0 0; color:#726256;">Administrador cria chefia e colaboradores. Chefia cria colaboradores e acompanha credenciais.</p>
+                        <p style="margin:0.3rem 0 0; color:#726256;">Administrador cria chefia e colaboradores. A autenticacao individual alimenta as analises de produtividade e desempenho.</p>
                     </div>
                 </div>
 
@@ -128,7 +128,7 @@
             <div class="toolbar">
                 <div>
                     <h2 style="margin:0;">Produtividade e atividade</h2>
-                    <p style="margin:0.3rem 0 0; color:#726256;">Filtre por periodo e colaborador para ver estatisticas operacionais.</p>
+                        <p style="margin:0.3rem 0 0; color:#726256;">Filtre por periodo e colaborador para ver vendas individualizadas, atividade por horario e contexto operacional.</p>
                 </div>
                 <div class="controls">
                     <select id="period-select">
