@@ -30,7 +30,7 @@
             text-decoration: none; color: var(--text); background: var(--accent-soft); padding: 0.7rem 1rem;
             border-radius: 999px; font-weight: 700;
         }
-        .admin-nav a:nth-child(2) { background: linear-gradient(135deg, var(--accent), #79411f); color: white; }
+        .admin-nav a.active { background: linear-gradient(135deg, var(--accent), #79411f); color: white; }
         .card {
             background: var(--panel); border: 1px solid var(--border); border-radius: 24px; padding: 1.35rem;
             box-shadow: 0 22px 48px rgba(68, 41, 26, 0.08);
@@ -40,6 +40,36 @@
         .columns { grid-template-columns: 1.35fr 1fr; }
         .mini-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
         .metric, .list-item { background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 1rem; }
+        .analytics-grid, .chart-grid { display: grid; gap: 1rem; }
+        .analytics-grid { grid-template-columns: 1.1fr 0.9fr; }
+        .chart-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+        .chart-card, .highlight-card, .empty-state { background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 1rem; }
+        .highlight-list { display: grid; gap: 0.75rem; }
+        .highlight-row { border: 1px solid var(--border); border-radius: 14px; padding: 0.85rem; background: #fffaf5; }
+        .highlight-row strong { display: block; margin-bottom: 0.25rem; }
+        .chart-head { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; margin-bottom: 0.8rem; }
+        .chart-head h3 { margin: 0; }
+        .chart-head p { margin: 0.25rem 0 0; color: var(--muted); }
+        .bar-chart { display: grid; gap: 0.7rem; }
+        .bar-row { display: grid; grid-template-columns: minmax(90px, 130px) 1fr 72px; gap: 0.7rem; align-items: center; }
+        .bar-track { height: 12px; background: #efe3d8; border-radius: 999px; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #d88a56, #9b5a32); }
+        .line-chart svg { width: 100%; height: 200px; display: block; }
+        .line-chart-labels { display: flex; justify-content: space-between; gap: 0.4rem; margin-top: 0.55rem; color: var(--muted); font-size: 0.82rem; }
+        .donut-layout { display: grid; grid-template-columns: 150px 1fr; gap: 1rem; align-items: center; }
+        .donut-ring {
+            width: 140px; height: 140px; border-radius: 50%; position: relative; margin: 0 auto; display: grid; place-items: center;
+        }
+        .donut-ring::after {
+            content: ''; width: 82px; height: 82px; border-radius: 50%; background: #fffaf5;
+            box-shadow: inset 0 0 0 1px rgba(155, 90, 50, 0.08);
+        }
+        .donut-value { position: absolute; z-index: 1; text-align: center; font-weight: 800; }
+        .donut-value span { display: block; font-size: 1.45rem; }
+        .legend { display: grid; gap: 0.55rem; }
+        .legend-item { display: flex; justify-content: space-between; gap: 0.8rem; align-items: center; }
+        .legend-label { display: inline-flex; align-items: center; gap: 0.5rem; }
+        .legend-swatch { width: 12px; height: 12px; border-radius: 50%; }
         .label { color: var(--muted); margin-bottom: 0.35rem; }
         .value { font-size: 1.15rem; font-weight: 700; }
         .toolbar { justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; }
@@ -50,8 +80,9 @@
         .lists { display: grid; gap: 0.8rem; }
         .list-item strong { display: block; margin-bottom: 0.4rem; }
         .badge { display: inline-block; padding: 0.25rem 0.55rem; border-radius: 999px; background: var(--accent-soft); font-size: 0.82rem; font-weight: 700; }
-        pre { overflow: auto; padding: 1rem; border-radius: 16px; background: #2c221d; color: #f7ede1; }
-        @media (max-width: 980px) { .columns { grid-template-columns: 1fr; } }
+        @media (max-width: 980px) {
+            .columns, .analytics-grid, .donut-layout { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -78,8 +109,9 @@
                         <option value="day">Dia</option>
                         <option value="week">Semana</option>
                         <option value="month">Mes</option>
+                        <option value="period">Periodo</option>
+                        <option value="year">Ano</option>
                     </select>
-                    <button id="refresh-button" type="button">Atualizar agora</button>
                 </div>
             </div>
 
@@ -109,8 +141,66 @@
         </section>
 
         <section class="card" style="margin-top:1rem;">
-            <h2 style="margin-top:0;">Resposta tecnica</h2>
-            <pre id="technical-response">Carregando...</pre>
+            <div class="toolbar" style="margin-bottom:0.8rem;">
+                <div>
+                    <h2 style="margin:0;">Estatisticas de vendas</h2>
+                    <p style="margin:0.3rem 0 0; color:#716257;">Indicadores e graficos para entender ritmo comercial, produto lider, meios de pagamento e evolucao de receita.</p>
+                </div>
+            </div>
+
+            <div class="analytics-grid">
+                <section class="chart-card">
+                    <div class="chart-head">
+                        <div>
+                            <h3>Evolucao do faturamento</h3>
+                            <p>Mostra como a receita fechada se comporta dentro do periodo escolhido.</p>
+                        </div>
+                    </div>
+                    <div id="sales-trend-chart"></div>
+                </section>
+
+                <section class="highlight-card">
+                    <div class="chart-head">
+                        <div>
+                            <h3>Leituras principais</h3>
+                            <p>Resumo rapido com os sinais mais importantes de venda.</p>
+                        </div>
+                    </div>
+                    <div id="sales-highlights" class="highlight-list"></div>
+                </section>
+            </div>
+
+            <div class="chart-grid" style="margin-top:1rem;">
+                <section class="chart-card">
+                    <div class="chart-head">
+                        <div>
+                            <h3>Produtos mais vendidos</h3>
+                            <p>Comparacao direta de volume vendido no periodo.</p>
+                        </div>
+                    </div>
+                    <div id="top-products-chart"></div>
+                </section>
+
+                <section class="chart-card">
+                    <div class="chart-head">
+                        <div>
+                            <h3>Mix de pagamentos</h3>
+                            <p>Distribuicao do valor recebido por metodo de pagamento.</p>
+                        </div>
+                    </div>
+                    <div id="payment-mix-chart"></div>
+                </section>
+
+                <section class="chart-card">
+                    <div class="chart-head">
+                        <div>
+                            <h3>Receita por categoria lider</h3>
+                            <p>Categoria com melhor giro e hora de maior movimento.</p>
+                        </div>
+                    </div>
+                    <div id="sales-summary-spotlight" class="highlight-list"></div>
+                </section>
+            </div>
         </section>
     </div>
 
@@ -126,7 +216,11 @@
         const stockAlerts = document.getElementById('stock-alerts');
         const recentOrders = document.getElementById('recent-orders');
         const openTables = document.getElementById('open-tables');
-        const technicalResponse = document.getElementById('technical-response');
+        const salesTrendChart = document.getElementById('sales-trend-chart');
+        const topProductsChart = document.getElementById('top-products-chart');
+        const paymentMixChart = document.getElementById('payment-mix-chart');
+        const salesHighlights = document.getElementById('sales-highlights');
+        const salesSummarySpotlight = document.getElementById('sales-summary-spotlight');
 
         async function authorizedFetch(url) {
             const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
@@ -141,6 +235,19 @@
 
         function currency(value) {
             return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(value || 0);
+        }
+
+        function formatMetricValue(value, format) {
+            if (format === 'currency') {
+                return currency(value);
+            }
+            if (format === 'percent') {
+                return `${Number(value || 0).toFixed(1)}%`;
+            }
+            if (format === 'decimal') {
+                return new Intl.NumberFormat('pt-PT', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(Number(value || 0));
+            }
+            return new Intl.NumberFormat('pt-PT').format(Number(value || 0));
         }
 
         function renderCards(container, cards) {
@@ -167,19 +274,115 @@
             });
         }
 
+        function renderBarChart(container, items, key, formatter, emptyMessage) {
+            if (!items.length) {
+                container.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
+                return;
+            }
+            const maxValue = Math.max(...items.map((item) => Number(item[key] || 0)), 1);
+            container.innerHTML = `
+                <div class="bar-chart">
+                    ${items.map((item) => {
+                        const value = Number(item[key] || 0);
+                        const width = Math.max((value / maxValue) * 100, value > 0 ? 8 : 0);
+                        return `
+                            <div class="bar-row">
+                                <strong>${item.label || item.product || item.method}</strong>
+                                <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+                                <span>${formatter(value)}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderLineChart(container, items, key, emptyMessage) {
+            if (!items.length) {
+                container.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
+                return;
+            }
+
+            const width = 520;
+            const height = 200;
+            const padding = 18;
+            const values = items.map((item) => Number(item[key] || 0));
+            const maxValue = Math.max(...values, 1);
+            const stepX = items.length === 1 ? 0 : (width - padding * 2) / (items.length - 1);
+            const points = items.map((item, index) => {
+                const value = Number(item[key] || 0);
+                const x = padding + (stepX * index);
+                const y = height - padding - ((value / maxValue) * (height - padding * 2));
+                return `${x},${y}`;
+            }).join(' ');
+            const dots = items.map((item, index) => {
+                const value = Number(item[key] || 0);
+                const x = padding + (stepX * index);
+                const y = height - padding - ((value / maxValue) * (height - padding * 2));
+                return `<circle cx="${x}" cy="${y}" r="4" fill="#9b5a32"></circle>`;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="line-chart">
+                    <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="${points}" fill="none" stroke="#d88a56" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                        ${dots}
+                    </svg>
+                    <div class="line-chart-labels">${items.map((item) => `<span>${item.label}</span>`).join('')}</div>
+                </div>
+            `;
+        }
+
+        function renderDonutChart(container, items, emptyMessage) {
+            if (!items.length) {
+                container.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
+                return;
+            }
+            const palette = ['#9b5a32', '#d88a56', '#6f8f79', '#4d6a85', '#c6a15b'];
+            const total = items.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+            if (!total) {
+                container.innerHTML = `<div class="empty-state">${emptyMessage}</div>`;
+                return;
+            }
+            let currentAngle = 0;
+            const segments = items.map((item, index) => {
+                const slice = (Number(item.amount || 0) / total) * 360;
+                const start = currentAngle;
+                currentAngle += slice;
+                return `${palette[index % palette.length]} ${start}deg ${currentAngle}deg`;
+            });
+            container.innerHTML = `
+                <div class="donut-layout">
+                    <div class="donut-ring" style="background:conic-gradient(${segments.join(', ')});">
+                        <div class="donut-value"><span>${items.length}</span>metodos</div>
+                    </div>
+                    <div class="legend">
+                        ${items.map((item, index) => `
+                            <div class="legend-item">
+                                <span class="legend-label"><span class="legend-swatch" style="background:${palette[index % palette.length]}"></span>${item.method}</span>
+                                <strong>${currency(item.amount)}</strong>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
         async function loadDashboard() {
             const period = periodSelect.value;
             const response = await authorizedFetch(`/api/admin/products/dashboard?period=${period}`);
             const data = await response.json();
 
-            renderCards(primaryMetrics, [
-                { label: 'Faturamento', value: currency(data.sales.sales_total) },
-                { label: 'Pedidos pagos', value: data.sales.orders_paid },
-                { label: 'Ticket medio', value: currency(data.sales.avg_ticket) },
-                { label: 'Itens vendidos', value: data.sales.items_sold },
-            ]);
+            renderCards(primaryMetrics, (data.sales_indicators || []).slice(0, 4).map((item) => ({
+                label: item.label,
+                value: formatMetricValue(item.value, item.format),
+            })));
 
             renderCards(secondaryMetrics, [
+                ...(data.sales_indicators || []).slice(4, 6).map((item) => ({
+                    label: item.label,
+                    value: formatMetricValue(item.value, item.format),
+                })),
                 { label: 'Valor em estoque', value: currency(data.inventory.stock_value) },
                 { label: 'Unidades em estoque', value: data.inventory.total_units },
                 { label: 'Baixo estoque', value: data.inventory.low_stock_count },
@@ -230,10 +433,67 @@
                 <div>Status: ${item.status}</div>
             `, 'Nenhuma mesa aberta neste momento.');
 
-            technicalResponse.textContent = JSON.stringify(data, null, 2);
+            renderLineChart(
+                salesTrendChart,
+                data.sales_highlights?.sales_trend || [],
+                'sales_total',
+                'Sem tendencia de faturamento para desenhar neste periodo.'
+            );
+
+            renderBarChart(
+                topProductsChart,
+                (data.top_products || []).slice(0, 6).map((item) => ({ ...item, label: item.product })),
+                'quantity',
+                (value) => `${value}`,
+                'Sem produtos vendidos para comparar neste periodo.'
+            );
+
+            renderDonutChart(
+                paymentMixChart,
+                data.sales_highlights?.payment_mix || [],
+                'Sem pagamentos suficientes para distribuir.'
+            );
+
+            renderList(salesHighlights, data.sales_indicators || [], (item) => `
+                <div class="highlight-row">
+                    <strong>${item.label}</strong>
+                    <div class="value">${formatMetricValue(item.value, item.format)}</div>
+                    <div>${item.hint || ''}</div>
+                </div>
+            `, 'Sem indicadores de vendas para mostrar.');
+
+            const spotlight = [];
+            if (data.sales_highlights?.top_product) {
+                spotlight.push({
+                    title: 'Produto lider',
+                    detail: `${data.sales_highlights.top_product.product} | ${data.sales_highlights.top_product.quantity} unidades`,
+                    subdetail: `Receita ${currency(data.sales_highlights.top_product.revenue)}`,
+                });
+            }
+            if (data.sales_highlights?.best_category) {
+                spotlight.push({
+                    title: 'Categoria lider',
+                    detail: `${data.sales_highlights.best_category.category} | ${data.sales_highlights.best_category.quantity} itens`,
+                    subdetail: `Receita ${currency(data.sales_highlights.best_category.revenue)}`,
+                });
+            }
+            if (data.sales_highlights?.busiest_hour) {
+                spotlight.push({
+                    title: 'Hora mais forte',
+                    detail: data.sales_highlights.busiest_hour.label,
+                    subdetail: `${data.sales_highlights.busiest_hour.orders} pedidos iniciados`,
+                });
+            }
+
+            renderList(salesSummarySpotlight, spotlight, (item) => `
+                <div class="highlight-row">
+                    <strong>${item.title}</strong>
+                    <div>${item.detail}</div>
+                    <div>${item.subdetail}</div>
+                </div>
+            `, 'Sem destaques comerciais suficientes neste periodo.');
         }
 
-        document.getElementById('refresh-button').addEventListener('click', loadDashboard);
         document.getElementById('logout-button').addEventListener('click', () => {
             localStorage.removeItem('access_token');
             localStorage.removeItem('auth_user');

@@ -253,8 +253,13 @@ def _ensure_collaborators(config):
             )
             collaborator.set_password(item["password"])
             db.session.add(collaborator)
-        elif collaborator.role != item["role"] and collaborator.email == item["email"].lower():
-            collaborator.role = item["role"]
+        else:
+            if collaborator.role != item["role"] and collaborator.email == item["email"].lower():
+                collaborator.role = item["role"]
+            collaborator.name = item["name"]
+            collaborator.active = True
+            if not collaborator.check_password(item["password"]):
+                collaborator.set_password(item["password"])
 
         ensure_collaborator_access(collaborator)
 

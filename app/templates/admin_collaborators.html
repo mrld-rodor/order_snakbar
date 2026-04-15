@@ -27,7 +27,17 @@
             text-decoration: none; color: var(--text); background: var(--accent-soft); padding: 0.7rem 1rem;
             border-radius: 999px; font-weight: 700;
         }
-        .admin-nav a:nth-child(2) { background: linear-gradient(135deg, var(--accent), #73401f); color: white; }
+        .admin-nav a.active { background: linear-gradient(135deg, var(--accent), #73401f); color: white; }
+        .collaborator-nav {
+            display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1rem;
+        }
+        .collaborator-nav a {
+            text-decoration: none; color: var(--text); background: #f2e4d7; padding: 0.72rem 1rem;
+            border-radius: 999px; font-weight: 700; border: 1px solid var(--border);
+        }
+        .collaborator-nav a.active {
+            background: linear-gradient(135deg, var(--accent), #73401f); color: white; border-color: transparent;
+        }
         .card {
             background: var(--panel); border: 1px solid var(--border); border-radius: 24px; padding: 1.35rem;
             box-shadow: 0 22px 48px rgba(68, 41, 26, 0.08);
@@ -47,6 +57,7 @@
         .metric, .list-item, .roster-card, .credentials-box, .info-box { background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 1rem; }
         .form-grid { display: grid; gap: 0.8rem; }
         .form-grid label { display: grid; gap: 0.35rem; font-weight: 600; }
+        .hidden { display: none; }
         .label { color: var(--muted); margin-bottom: 0.35rem; }
         .value { font-size: 1.15rem; font-weight: 700; }
         .lists { display: grid; gap: 0.8rem; }
@@ -54,15 +65,109 @@
         .rank { display: inline-flex; align-items: center; justify-content: center; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--accent-soft); font-weight: 700; margin-right: 0.5rem; }
         .chips { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-top: 0.5rem; }
         .chip { display: inline-flex; padding: 0.25rem 0.6rem; border-radius: 999px; background: var(--accent-soft); font-size: 0.82rem; font-weight: 700; }
+        .roster-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.9rem; }
+        .roster-actions button { flex: 1; min-width: 110px; }
+        button.danger-button { background: #9c2f28; }
         .message { min-height: 1.4rem; margin-top: 0.6rem; font-weight: 700; }
         .message.error { color: #9c2f28; }
         .message.success { color: #2d6a44; }
+        .toast-stack {
+            position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 55; display: grid; gap: 0.8rem;
+            width: min(380px, calc(100vw - 2rem));
+        }
+        .toast {
+            border-radius: 18px; border: 1px solid var(--border); padding: 0.95rem 1rem; background: rgba(255, 250, 245, 0.98);
+            box-shadow: 0 18px 44px rgba(42, 32, 25, 0.18); animation: toast-in 180ms ease-out;
+        }
+        .toast.success { border-color: #9fc0ac; background: rgba(244, 251, 246, 0.98); }
+        .toast.error { border-color: #d2a19b; background: rgba(255, 245, 243, 0.98); }
+        .toast.info { border-color: #d8c0ae; }
+        .toast strong { display: block; margin-bottom: 0.35rem; }
+        .toast p { margin: 0; color: var(--muted); }
+        .toast .chips { margin-top: 0.7rem; }
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .profile-dashboard, .profile-grid, .chart-grid, .table-grid, .log-grid, .indicator-grid { display: grid; gap: 1rem; }
+        .profile-grid { grid-template-columns: 1.1fr 0.9fr; }
+        .chart-grid, .table-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+        .indicator-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+        .profile-panel, .chart-card, .table-card, .log-card, .empty-state {
+            background: #fff; border: 1px solid var(--border); border-radius: 20px; padding: 1rem;
+        }
+        .profile-header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+        .profile-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem; }
+        .profile-badge { padding: 0.3rem 0.7rem; border-radius: 999px; background: var(--accent-soft); font-size: 0.82rem; font-weight: 700; }
+        .indicator-card { background: linear-gradient(180deg, #fffaf5, #fff); border: 1px solid var(--border); border-radius: 16px; padding: 0.95rem; }
+        .indicator-card .value { font-size: 1.35rem; }
+        .chart-head { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; margin-bottom: 0.9rem; }
+        .chart-head h3, .table-card h3, .log-card h3 { margin: 0; }
+        .chart-head p, .table-card p, .log-card p { margin: 0.2rem 0 0; color: var(--muted); }
+        .bar-chart { display: grid; gap: 0.7rem; }
+        .bar-row { display: grid; grid-template-columns: 44px 1fr 54px; gap: 0.7rem; align-items: center; }
+        .bar-track { position: relative; height: 12px; border-radius: 999px; background: #efe3d8; overflow: hidden; }
+        .bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #d88a56, #8e5231); }
+        .mini-note { color: var(--muted); font-size: 0.9rem; }
+        .donut-layout { display: grid; grid-template-columns: 160px 1fr; gap: 1rem; align-items: center; }
+        .donut-ring {
+            width: 150px; height: 150px; border-radius: 50%; position: relative; margin: 0 auto;
+            display: grid; place-items: center;
+        }
+        .donut-ring::after {
+            content: ''; width: 88px; height: 88px; border-radius: 50%; background: #fffaf5;
+            box-shadow: inset 0 0 0 1px rgba(142, 82, 49, 0.08);
+        }
+        .donut-value { position: absolute; text-align: center; font-weight: 800; z-index: 1; }
+        .donut-value span { display: block; font-size: 1.55rem; }
+        .legend { display: grid; gap: 0.55rem; }
+        .legend-item { display: flex; justify-content: space-between; gap: 1rem; align-items: center; }
+        .legend-label { display: inline-flex; align-items: center; gap: 0.5rem; }
+        .legend-swatch { width: 12px; height: 12px; border-radius: 50%; }
+        .line-chart svg { width: 100%; height: 180px; display: block; }
+        .line-chart-labels { display: flex; justify-content: space-between; gap: 0.6rem; margin-top: 0.65rem; color: var(--muted); font-size: 0.82rem; }
+        .table-list, .product-list, .activity-list { display: grid; gap: 0.75rem; }
+        .table-item, .product-item, .activity-item {
+            border: 1px solid var(--border); border-radius: 16px; padding: 0.9rem; background: #fffaf5;
+        }
+        .table-item strong, .product-item strong, .activity-item strong { display: block; margin-bottom: 0.35rem; }
+        .activity-meta { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-top: 0.55rem; }
+        .activity-meta .chip { background: #f2e5d8; }
+        .sale-toast-overlay {
+            position: fixed; inset: 0; background: rgba(42, 32, 25, 0.38); display: none;
+            align-items: flex-end; justify-content: flex-end; padding: 1.2rem; z-index: 40;
+        }
+        .sale-toast-overlay.open { display: flex; }
+        .sale-toast-card {
+            width: min(440px, 100%); max-height: min(82vh, 760px); overflow: auto; background: #fffaf5;
+            border: 1px solid var(--border); border-radius: 24px; padding: 1.1rem;
+            box-shadow: 0 30px 70px rgba(42, 32, 25, 0.24);
+        }
+        .sale-toast-header { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; margin-bottom: 1rem; }
+        .sale-toast-header h3 { margin: 0; }
+        .sale-toast-close {
+            min-width: 42px; min-height: 42px; padding: 0; border-radius: 50%;
+            background: var(--accent-soft); color: var(--text);
+        }
+        .sale-toast-grid { display: grid; gap: 0.8rem; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 1rem; }
+        .sale-toast-block { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 0.85rem; }
+        .sale-items-list { display: grid; gap: 0.7rem; }
+        .sale-item-row {
+            display: grid; grid-template-columns: 1fr auto; gap: 0.8rem; align-items: center;
+            border: 1px solid var(--border); border-radius: 16px; padding: 0.85rem; background: white;
+        }
+        .sale-item-row strong { margin-bottom: 0.3rem; display: block; }
+        .empty-state { text-align: center; color: var(--muted); }
         pre { overflow: auto; padding: 1rem; border-radius: 16px; background: #2c221d; color: #f7ede1; }
-        @media (max-width: 980px) { .layout, .management-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 980px) {
+            .layout, .management-grid, .profile-grid, .donut-layout { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
     <div class="shell">
+        <div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
         <div class="topbar">
             <div>
                 <p>{{ app_name }}</p>
@@ -70,7 +175,6 @@
                 <p>Gestao da equipa e leitura individualizada de produtividade, desempenho e horarios de venda por colaborador.</p>
             </div>
             <div class="toolbar">
-                <a href="/operacao" style="text-decoration:none;"><button class="secondary-button" type="button">Tela central</button></a>
                 <button id="logout-button" type="button">Sair</button>
             </div>
         </div>
@@ -79,12 +183,25 @@
         {% include 'admin_nav.html' %}
         {% endif %}
 
+        <nav class="collaborator-nav" aria-label="Navegacao de colaboradores">
+            <a href="{{ sales_url }}">Painel de vendas</a>
+            <a href="{{ productivity_url }}" class="{% if active_collaborator_tab == 'produtividade' %}active{% endif %}">Produtividade</a>
+            <a href="{{ management_url }}" class="{% if active_collaborator_tab == 'gerenciamento' %}active{% endif %}">Gerenciamento</a>
+        </nav>
+
+        {% if show_management %}
         <div class="management-grid">
             <section class="card">
                 <div style="display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1rem;">
                     <div>
                         <h2 style="margin:0;">Cadastro de equipa</h2>
-                        <p style="margin:0.3rem 0 0; color:#726256;">Administrador cria chefia e colaboradores. A autenticacao individual alimenta as analises de produtividade e desempenho.</p>
+                        <p style="margin:0.3rem 0 0; color:#726256;">
+                            {% if show_admin_nav %}
+                            Administrador cria chefia e colaboradores. A autenticacao individual alimenta as analises de produtividade e desempenho.
+                            {% else %}
+                            A chefia pode adicionar colaboradores e consultar a equipa ativa. Edicao e remocao continuam restritas ao administrador.
+                            {% endif %}
+                        </p>
                     </div>
                 </div>
 
@@ -93,6 +210,7 @@
                 </div>
 
                 <form id="create-collaborator-form" class="form-grid">
+                    <input id="editing-collaborator-id" type="hidden">
                     <label>
                         Nome
                         <input id="create-name" name="name" type="text" required>
@@ -105,7 +223,15 @@
                         Perfil
                         <select id="create-role" name="role"></select>
                     </label>
-                    <button type="submit">Gerar acesso e PIN</button>
+                    <label id="active-wrapper" class="hidden">
+                        Ativo
+                        <select id="create-active" name="active">
+                            <option value="true">Ativo</option>
+                            <option value="false">Inativo</option>
+                        </select>
+                    </label>
+                    <button type="submit" id="submit-collaborator-button">Gerar acesso e PIN</button>
+                    <button type="button" id="cancel-edit-button" class="secondary-button hidden">Cancelar edicao</button>
                 </form>
                 <div id="create-message" class="message"></div>
 
@@ -118,12 +244,13 @@
                         <h2 style="margin:0;">Equipa cadastrada</h2>
                         <p style="margin:0.3rem 0 0; color:#726256;">Lista operacional com codigos de acesso para o sistema de vendas.</p>
                     </div>
-                    <button id="refresh-roster-button" class="secondary-button" type="button">Atualizar lista</button>
                 </div>
                 <div id="roster" class="roster"></div>
             </section>
         </div>
+        {% endif %}
 
+        {% if show_productivity %}
         <section class="card">
             <div class="toolbar">
                 <div>
@@ -139,7 +266,6 @@
                     <select id="collaborator-select">
                         <option value="">Toda a equipa</option>
                     </select>
-                    <button id="refresh-button" type="button">Atualizar agora</button>
                 </div>
             </div>
             <div id="metrics" class="metrics"></div>
@@ -160,9 +286,24 @@
         </div>
 
         <section class="card" style="margin-top:1rem;">
-            <h2 style="margin-top:0;">Resposta tecnica</h2>
-            <pre id="technical-response">Carregando...</pre>
+            <h2 style="margin-top:0;">Perfil geral do colaborador</h2>
+            <p style="margin:0.3rem 0 1rem; color:#726256;">Selecione um colaborador para abrir um subpainel com ritmo de atendimento, desempenho por mesa, distribuicao por horario e log recente de operacoes.</p>
+            <div id="profile-dashboard" class="profile-dashboard"></div>
         </section>
+        {% endif %}
+
+        <div id="sale-toast-overlay" class="sale-toast-overlay" aria-hidden="true">
+            <div class="sale-toast-card" role="dialog" aria-modal="true" aria-labelledby="sale-toast-title">
+                <div class="sale-toast-header">
+                    <div>
+                        <div class="label">Detalhes da venda</div>
+                        <h3 id="sale-toast-title">Pedido</h3>
+                    </div>
+                    <button id="sale-toast-close" class="sale-toast-close" type="button">×</button>
+                </div>
+                <div id="sale-toast-content"></div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -175,21 +316,44 @@
         const ranking = document.getElementById('ranking');
         const openOrders = document.getElementById('open-orders');
         const recentOrders = document.getElementById('recent-orders');
-        const technicalResponse = document.getElementById('technical-response');
+        const profileDashboard = document.getElementById('profile-dashboard');
         const roster = document.getElementById('roster');
+        const saleToastOverlay = document.getElementById('sale-toast-overlay');
+        const saleToastContent = document.getElementById('sale-toast-content');
+        const saleToastTitle = document.getElementById('sale-toast-title');
+        const saleToastClose = document.getElementById('sale-toast-close');
+        const toastStack = document.getElementById('toast-stack');
         const createForm = document.getElementById('create-collaborator-form');
         const createMessage = document.getElementById('create-message');
         const createRole = document.getElementById('create-role');
         const generatedCredentials = document.getElementById('generated-credentials');
         const currentUserBox = document.getElementById('current-user-box');
+        const editingCollaboratorId = document.getElementById('editing-collaborator-id');
+        const createActive = document.getElementById('create-active');
+        const activeWrapper = document.getElementById('active-wrapper');
+        const submitCollaboratorButton = document.getElementById('submit-collaborator-button');
+        const cancelEditButton = document.getElementById('cancel-edit-button');
+        const canManageTeam = {{ 'true' if show_management else 'false' }};
+        const canViewProductivity = {{ 'true' if show_productivity else 'false' }};
+        const productivityPageUrl = {{ productivity_url|tojson }};
+        const initialCollaboratorId = {{ initial_collaborator_id|tojson }};
 
         const state = {
             currentUser: null,
             collaborators: [],
+            editingCollaborator: null,
+            recentOrders: [],
+            toastTimers: new Map(),
         };
 
-        async function authorizedFetch(url) {
-            const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        async function authorizedFetch(url, options = {}) {
+            const headers = new Headers(options.headers || {});
+            headers.set('Authorization', `Bearer ${token}`);
+            if (options.body && !(options.body instanceof FormData) && !headers.has('Content-Type')) {
+                headers.set('Content-Type', 'application/json');
+            }
+
+            const response = await fetch(url, { ...options, headers });
             if (response.status === 401 || response.status === 422) {
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('auth_user');
@@ -203,12 +367,92 @@
             return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(value || 0);
         }
 
-        function setCreateMessage(text, type = '') {
-            createMessage.textContent = text || '';
-            createMessage.className = 'message';
-            if (type) {
-                createMessage.classList.add(type);
+        function formatNumber(value, digits = 1) {
+            return new Intl.NumberFormat('pt-PT', {
+                minimumFractionDigits: digits,
+                maximumFractionDigits: digits,
+            }).format(Number(value || 0));
+        }
+
+        function formatMinutes(value) {
+            if (!value) {
+                return '0 min';
             }
+            const minutes = Number(value);
+            if (minutes >= 60) {
+                const hours = Math.floor(minutes / 60);
+                const remaining = Math.round(minutes % 60);
+                return `${hours}h ${remaining}min`;
+            }
+            return `${Math.round(minutes)} min`;
+        }
+
+        function formatDateTime(value) {
+            if (!value) {
+                return 'Nao informado';
+            }
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) {
+                return value;
+            }
+            return new Intl.DateTimeFormat('pt-PT', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            }).format(date);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function setCreateMessage(text, type = '') {
+            if (!canManageTeam) {
+                return;
+            }
+            createMessage.textContent = '';
+            createMessage.className = 'message';
+            if (!text) {
+                return;
+            }
+            showToast({
+                title: type === 'error' ? 'Falha na operacao' : 'Operacao concluida',
+                message: text,
+                type: type || 'info',
+            });
+        }
+
+        function showToast({ title, message, type = 'info', chips = [], duration = 4200 }) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <strong>${escapeHtml(title || 'Notificacao')}</strong>
+                <p>${escapeHtml(message || '')}</p>
+                ${chips.length ? `<div class="chips">${chips.map((chip) => `<span class="chip">${escapeHtml(chip)}</span>`).join('')}</div>` : ''}
+            `;
+            toastStack.appendChild(toast);
+
+            const timer = window.setTimeout(() => {
+                toast.remove();
+                state.toastTimers.delete(toast);
+            }, duration);
+            state.toastTimers.set(toast, timer);
+
+            toast.addEventListener('click', () => {
+                const activeTimer = state.toastTimers.get(toast);
+                if (activeTimer) {
+                    window.clearTimeout(activeTimer);
+                    state.toastTimers.delete(toast);
+                }
+                toast.remove();
+            });
         }
 
         function redirectByRole(role) {
@@ -219,6 +463,9 @@
         }
 
         function updateRoleOptions() {
+            if (!canManageTeam) {
+                return;
+            }
             const options = state.currentUser?.role === 'administrador'
                 ? [
                     { value: 'colaborador', label: 'Colaborador' },
@@ -231,7 +478,44 @@
                 .join('');
         }
 
+        function resetCollaboratorForm() {
+            if (!canManageTeam) {
+                return;
+            }
+            state.editingCollaborator = null;
+            editingCollaboratorId.value = '';
+            createForm.reset();
+            createActive.value = 'true';
+            submitCollaboratorButton.textContent = 'Gerar acesso e PIN';
+            activeWrapper.classList.add('hidden');
+            cancelEditButton.classList.add('hidden');
+            generatedCredentials.style.display = 'none';
+            updateRoleOptions();
+        }
+
+        function fillCollaboratorForm(collaborator) {
+            if (!canManageTeam) {
+                return;
+            }
+            state.editingCollaborator = collaborator;
+            editingCollaboratorId.value = collaborator.id;
+            document.getElementById('create-name').value = collaborator.name;
+            document.getElementById('create-email').value = collaborator.email;
+            createRole.value = collaborator.role;
+            createActive.value = collaborator.active ? 'true' : 'false';
+            submitCollaboratorButton.textContent = 'Atualizar colaborador';
+            activeWrapper.classList.remove('hidden');
+            cancelEditButton.classList.remove('hidden');
+            generatedCredentials.style.display = 'none';
+            setCreateMessage(`Editando ${collaborator.name}.`, 'success');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function renderCurrentUser() {
+            if (!canManageTeam || !currentUserBox) {
+                return;
+            }
+
             if (!state.currentUser) {
                 currentUserBox.textContent = 'Utilizador autenticado nao encontrado.';
                 return;
@@ -260,6 +544,9 @@
         }
 
         function renderMetrics(data) {
+            if (!canViewProductivity || !metrics) {
+                return;
+            }
             metrics.innerHTML = '';
             const title = data.selected_collaborator ? data.selected_collaborator.name : 'Toda a equipa';
             const cards = [
@@ -280,6 +567,9 @@
         }
 
         function renderRoster() {
+            if (!canManageTeam || !roster) {
+                return;
+            }
             roster.innerHTML = '';
             if (!state.collaborators.length) {
                 roster.innerHTML = '<div class="roster-card">Nenhum colaborador cadastrado ainda.</div>';
@@ -297,9 +587,320 @@
                         <span class="chip">Codigo ${item.access_code || 'N/D'}</span>
                         <span class="chip">${item.active ? 'Ativo' : 'Inativo'}</span>
                     </div>
+                    <div class="roster-actions">
+                        <button type="button" class="secondary-button" data-action="view" data-id="${item.id}">Ver painel</button>
+                        ${state.currentUser?.role === 'administrador' ? `
+                            <button type="button" class="secondary-button" data-action="edit" data-id="${item.id}">Editar</button>
+                            <button type="button" class="danger-button" data-action="delete" data-id="${item.id}">Apagar</button>
+                        ` : ''}
+                    </div>
                 `;
                 roster.appendChild(node);
             });
+        }
+
+        function renderDonut(items) {
+            const palette = ['#8e5231', '#d88a56', '#6f8f79', '#4d6a85', '#c6a15b'];
+            const total = items.reduce((sum, item) => sum + Number(item.value || 0), 0);
+            if (!total) {
+                return '<div class="empty-state">Sem estados suficientes para desenhar o grafico.</div>';
+            }
+
+            let currentAngle = 0;
+            const segments = items.map((item, index) => {
+                const slice = (Number(item.value || 0) / total) * 360;
+                const start = currentAngle;
+                currentAngle += slice;
+                return `${palette[index % palette.length]} ${start}deg ${currentAngle}deg`;
+            });
+
+            const legend = items.map((item, index) => `
+                <div class="legend-item">
+                    <span class="legend-label"><span class="legend-swatch" style="background:${palette[index % palette.length]}"></span>${escapeHtml(item.label)}</span>
+                    <strong>${item.value}</strong>
+                </div>
+            `).join('');
+
+            return `
+                <div class="donut-layout">
+                    <div class="donut-ring" style="background:conic-gradient(${segments.join(', ')});">
+                        <div class="donut-value"><span>${total}</span>Total</div>
+                    </div>
+                    <div class="legend">${legend}</div>
+                </div>
+            `;
+        }
+
+        function renderBarChart(items, key, formatter) {
+            if (!items.length) {
+                return '<div class="empty-state">Sem dados suficientes para o grafico.</div>';
+            }
+
+            const maxValue = Math.max(...items.map((item) => Number(item[key] || 0)), 1);
+            return `
+                <div class="bar-chart">
+                    ${items.map((item) => {
+                        const value = Number(item[key] || 0);
+                        const width = Math.max((value / maxValue) * 100, value > 0 ? 8 : 0);
+                        return `
+                            <div class="bar-row">
+                                <strong>${escapeHtml(item.label)}</strong>
+                                <div class="bar-track"><div class="bar-fill" style="width:${width}%"></div></div>
+                                <span>${formatter(value)}</span>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderLineChart(items, key) {
+            if (!items.length) {
+                return '<div class="empty-state">Sem tendencia suficiente para o periodo.</div>';
+            }
+
+            const width = 420;
+            const height = 180;
+            const padding = 18;
+            const values = items.map((item) => Number(item[key] || 0));
+            const maxValue = Math.max(...values, 1);
+            const stepX = items.length === 1 ? 0 : (width - padding * 2) / (items.length - 1);
+            const points = items.map((item, index) => {
+                const value = Number(item[key] || 0);
+                const x = padding + (stepX * index);
+                const y = height - padding - ((value / maxValue) * (height - padding * 2));
+                return `${x},${y}`;
+            }).join(' ');
+
+            const dots = items.map((item, index) => {
+                const value = Number(item[key] || 0);
+                const x = padding + (stepX * index);
+                const y = height - padding - ((value / maxValue) * (height - padding * 2));
+                return `<circle cx="${x}" cy="${y}" r="4" fill="#8e5231"></circle>`;
+            }).join('');
+
+            const labels = items.map((item) => `<span>${escapeHtml(item.label)}</span>`).join('');
+            return `
+                <div class="line-chart">
+                    <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="${points}" fill="none" stroke="#d88a56" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                        ${dots}
+                    </svg>
+                    <div class="line-chart-labels">${labels}</div>
+                </div>
+            `;
+        }
+
+        function renderProfileDashboard(profile) {
+            if (!canViewProductivity || !profileDashboard) {
+                return;
+            }
+            if (!profile) {
+                profileDashboard.innerHTML = `
+                    <div class="empty-state">
+                        <h3 style="margin-top:0;">Selecione um colaborador</h3>
+                        <p style="margin:0;">Use a lista da equipa ou o seletor no topo para abrir o subdashboard individual com indicadores simples e o log de atendimentos.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const indicators = profile.indicators || {};
+            const hourlyData = [...(profile.hourly_flow || [])]
+                .filter((item) => item.orders > 0)
+                .sort((left, right) => right.orders - left.orders || left.hour - right.hour)
+                .slice(0, 8);
+            const tableCards = (profile.table_performance || []).map((item) => `
+                <div class="table-item">
+                    <strong>Mesa ${item.table_number}</strong>
+                    <div>Pedidos fechados: ${item.orders_count}</div>
+                    <div>Ticket medio: ${currency(item.avg_ticket)}</div>
+                    <div>Tempo medio: ${formatMinutes(item.avg_duration_minutes)}</div>
+                    <div>Receita: ${currency(item.sales_total)}</div>
+                </div>
+            `).join('') || '<div class="empty-state">Sem mesas fechadas no periodo.</div>';
+
+            const productCards = (profile.top_products || []).map((item) => `
+                <div class="product-item">
+                    <strong>${escapeHtml(item.product)}</strong>
+                    <div>Quantidade: ${item.quantity}</div>
+                    <div>Receita: ${currency(item.revenue)}</div>
+                </div>
+            `).join('') || '<div class="empty-state">Nenhum produto fechado no periodo.</div>';
+
+            const activityCards = (profile.activity_log || []).map((item) => `
+                <div class="activity-item">
+                    <strong>Pedido #${item.order_id} | Mesa ${item.table_number}</strong>
+                    <div>Status: ${escapeHtml(item.status)}</div>
+                    <div>Inicio: ${escapeHtml(item.opened_at || 'N/D')}</div>
+                    <div>Fim: ${escapeHtml(item.closed_at || 'Em andamento')}</div>
+                    <div>Duracao: ${formatMinutes(item.duration_minutes)}</div>
+                    <div>Total: ${currency(item.total)}</div>
+                    <div class="activity-meta">
+                        <span class="chip">${item.items_count} itens</span>
+                        ${item.discount_amount > 0 ? `<span class="chip">Desconto ${currency(item.discount_amount)}</span>` : ''}
+                        ${item.payment_method ? `<span class="chip">Pagamento ${escapeHtml(item.payment_method)}</span>` : ''}
+                    </div>
+                </div>
+            `).join('') || '<div class="empty-state">Nenhum atendimento recente para listar.</div>';
+
+            profileDashboard.innerHTML = `
+                <div class="profile-grid">
+                    <section class="profile-panel">
+                        <div class="profile-header">
+                            <div>
+                                <div class="label">Colaborador selecionado</div>
+                                <div class="value">${escapeHtml(profile.collaborator.name)}</div>
+                                <p style="margin:0.45rem 0 0; color:#726256;">${escapeHtml(profile.summary)}</p>
+                            </div>
+                            <div class="chips">
+                                <span class="chip">${escapeHtml(profile.collaborator.role)}</span>
+                                <span class="chip">Codigo ${escapeHtml(profile.collaborator.access_code || 'N/D')}</span>
+                                <span class="chip">${profile.collaborator.active ? 'Ativo' : 'Inativo'}</span>
+                            </div>
+                        </div>
+                        <div class="profile-badges">
+                            ${(profile.badges || []).map((item) => `<span class="profile-badge">${escapeHtml(item)}</span>`).join('')}
+                        </div>
+                    </section>
+
+                    <section class="profile-panel">
+                        <div class="chart-head">
+                            <div>
+                                <h3>Leitura rapida</h3>
+                                <p>Resumo direto para entender ritmo, foco e carga atual.</p>
+                            </div>
+                        </div>
+                        <div class="indicator-grid">
+                            <div class="indicator-card"><div class="label">Media de pedidos por mesa</div><div class="value">${formatNumber(indicators.avg_orders_per_table)}</div></div>
+                            <div class="indicator-card"><div class="label">Tempo medio por atendimento</div><div class="value">${formatMinutes(indicators.avg_duration_minutes)}</div></div>
+                            <div class="indicator-card"><div class="label">Media de itens por pedido</div><div class="value">${formatNumber(indicators.avg_items_per_order)}</div></div>
+                            <div class="indicator-card"><div class="label">Receita media por mesa</div><div class="value">${currency(indicators.avg_revenue_per_table)}</div></div>
+                            <div class="indicator-card"><div class="label">Menor atendimento</div><div class="value">${formatMinutes(indicators.shortest_service_minutes)}</div></div>
+                            <div class="indicator-card"><div class="label">Maior atendimento</div><div class="value">${formatMinutes(indicators.longest_service_minutes)}</div></div>
+                            <div class="indicator-card"><div class="label">Mesas atendidas</div><div class="value">${indicators.tables_served || 0}</div></div>
+                            <div class="indicator-card"><div class="label">Mesas abertas agora</div><div class="value">${indicators.open_orders_count || 0}</div><div class="mini-note">Idade media ${formatMinutes(indicators.avg_open_age_minutes)}</div></div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="chart-grid">
+                    <section class="chart-card">
+                        <div class="chart-head">
+                            <div>
+                                <h3>Estado dos atendimentos</h3>
+                                <p>Visao simples do que foi fechado e do que ainda esta em curso.</p>
+                            </div>
+                        </div>
+                        ${renderDonut(profile.status_mix || [])}
+                    </section>
+
+                    <section class="chart-card">
+                        <div class="chart-head">
+                            <div>
+                                <h3>Horas mais movimentadas</h3>
+                                <p>Faixas em que este colaborador mais abre atendimentos.</p>
+                            </div>
+                        </div>
+                        ${renderBarChart(hourlyData, 'orders', (value) => `${value}`)}
+                    </section>
+
+                    <section class="chart-card">
+                        <div class="chart-head">
+                            <div>
+                                <h3>Evolucao de vendas no periodo</h3>
+                                <p>Linha simples com o valor fechado por dia.</p>
+                            </div>
+                        </div>
+                        ${renderLineChart(profile.daily_trend || [], 'sales_total')}
+                    </section>
+                </div>
+
+                <div class="table-grid">
+                    <section class="table-card">
+                        <h3>Desempenho por mesa</h3>
+                        <p>Mesas em que o colaborador gerou mais receita e volume.</p>
+                        <div class="table-list">${tableCards}</div>
+                    </section>
+
+                    <section class="table-card">
+                        <h3>Produtos mais vendidos</h3>
+                        <p>Itens que mais aparecem nos fechamentos deste colaborador.</p>
+                        <div class="product-list">${productCards}</div>
+                    </section>
+                </div>
+
+                <section class="log-card">
+                    <h3>Log recente de atendimentos</h3>
+                    <p>Historico curto para leitura operacional rapida do trabalho por mesa.</p>
+                    <div class="activity-list">${activityCards}</div>
+                </section>
+            `;
+        }
+
+        function renderSaleToast(order) {
+            if (!canViewProductivity) {
+                return;
+            }
+            const items = (order.items || []).map((item) => `
+                <div class="sale-item-row">
+                    <div>
+                        <strong>${escapeHtml(item.name)}</strong>
+                        <div>${item.quantity} x ${currency(item.unit_price)}</div>
+                    </div>
+                    <strong>${currency(item.line_total)}</strong>
+                </div>
+            `).join('') || '<div class="empty-state">Nenhum item registrado nesta venda.</div>';
+
+            saleToastTitle.textContent = `Pedido #${order.id} | Mesa ${order.table_number}`;
+            saleToastContent.innerHTML = `
+                <div class="sale-toast-grid">
+                    <div class="sale-toast-block">
+                        <div class="label">Vendedor</div>
+                        <div class="value">${escapeHtml(order.collaborator || 'Nao atribuido')}</div>
+                    </div>
+                    <div class="sale-toast-block">
+                        <div class="label">Status</div>
+                        <div class="value">${escapeHtml(order.status || 'N/D')}</div>
+                    </div>
+                    <div class="sale-toast-block">
+                        <div class="label">Entrada da mesa</div>
+                        <div>${escapeHtml(formatDateTime(order.opened_at))}</div>
+                    </div>
+                    <div class="sale-toast-block">
+                        <div class="label">Fecho da conta</div>
+                        <div>${escapeHtml(formatDateTime(order.closed_at))}</div>
+                    </div>
+                    <div class="sale-toast-block">
+                        <div class="label">Metodo de pagamento</div>
+                        <div>${escapeHtml(order.payment?.method || 'Nao informado')}</div>
+                    </div>
+                    <div class="sale-toast-block">
+                        <div class="label">Data da venda</div>
+                        <div>${escapeHtml(formatDateTime(order.closed_at || order.opened_at))}</div>
+                    </div>
+                </div>
+                <div class="sale-toast-block" style="margin-bottom:1rem;">
+                    <div class="label">Resumo financeiro</div>
+                    <div class="chips">
+                        <span class="chip">Subtotal ${currency(order.subtotal)}</span>
+                        ${Number(order.discount_amount || 0) > 0 ? `<span class="chip">Desconto ${currency(order.discount_amount)}</span>` : ''}
+                        <span class="chip">Total ${currency(order.total)}</span>
+                    </div>
+                </div>
+                <div>
+                    <div class="label" style="margin-bottom:0.7rem;">Itens comprados</div>
+                    <div class="sale-items-list">${items}</div>
+                </div>
+            `;
+
+            saleToastOverlay.classList.add('open');
+            saleToastOverlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeSaleToast() {
+            saleToastOverlay.classList.remove('open');
+            saleToastOverlay.setAttribute('aria-hidden', 'true');
         }
 
         async function loadCurrentUser() {
@@ -309,9 +910,18 @@
             redirectByRole(state.currentUser.role);
             renderCurrentUser();
             updateRoleOptions();
+            showToast({
+                title: 'Painel pronto',
+                message: `Sessao de ${state.currentUser.name} carregada com sucesso.`,
+                type: 'info',
+                duration: 2600,
+            });
         }
 
         async function loadManagedCollaborators() {
+            if (!canManageTeam) {
+                return;
+            }
             const response = await authorizedFetch('/api/management/collaborators');
             const data = await response.json();
             state.collaborators = data.collaborators;
@@ -319,6 +929,10 @@
         }
 
         async function loadCollaborators() {
+            if (!canViewProductivity || !collaboratorSelect) {
+                return;
+            }
+            const currentValue = collaboratorSelect.value || (initialCollaboratorId ? String(initialCollaboratorId) : '');
             const response = await authorizedFetch('/api/management/collaborators');
             const data = await response.json();
             collaboratorSelect.innerHTML = '<option value="">Toda a equipa</option>';
@@ -328,9 +942,15 @@
                 option.textContent = item.name;
                 collaboratorSelect.appendChild(option);
             });
+            collaboratorSelect.value = Array.from(collaboratorSelect.options).some((option) => option.value === currentValue)
+                ? currentValue
+                : '';
         }
 
         async function loadDashboard() {
+            if (!canViewProductivity || !periodSelect || !collaboratorSelect) {
+                return;
+            }
             const period = periodSelect.value;
             const collaboratorId = collaboratorSelect.value;
             const query = new URLSearchParams({ period });
@@ -340,6 +960,7 @@
 
             const response = await authorizedFetch(`/api/admin/collaborators/dashboard?${query.toString()}`);
             const data = await response.json();
+            state.recentOrders = data.recent_orders || [];
 
             renderMetrics(data);
             renderList(ranking, data.ranking, (item, index) => `
@@ -362,60 +983,215 @@
                 <div>Colaborador: ${item.collaborator || 'Nao atribuido'}</div>
                 <div>Status: ${item.status}</div>
                 <div>Total: ${currency(item.total)}</div>
+                <div class="roster-actions" style="margin-top:0.8rem;">
+                    <button type="button" class="secondary-button" data-action="details" data-order-id="${item.id}">Ver detalhes</button>
+                </div>
             `, 'Nenhum pedido recente para o contexto atual.');
 
-            technicalResponse.textContent = JSON.stringify(data, null, 2);
+            renderProfileDashboard(data.selected_profile);
         }
 
-        createForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            setCreateMessage('');
-            generatedCredentials.style.display = 'none';
+        if (createForm) {
+            createForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                setCreateMessage('');
+                generatedCredentials.style.display = 'none';
 
-            const payload = {
-                name: document.getElementById('create-name').value,
-                email: document.getElementById('create-email').value,
-                role: createRole.value,
-            };
+                const payload = {
+                    name: document.getElementById('create-name').value,
+                    email: document.getElementById('create-email').value,
+                    role: createRole.value,
+                };
 
-            const response = await authorizedFetch('/api/management/collaborators', {
-                method: 'POST',
-                body: JSON.stringify(payload),
+                const collaboratorId = editingCollaboratorId.value;
+                const isEditing = Boolean(collaboratorId);
+                if (isEditing) {
+                    payload.active = createActive.value === 'true';
+                }
+
+                const response = await authorizedFetch(
+                    isEditing ? `/api/management/collaborators/${collaboratorId}` : '/api/management/collaborators',
+                    {
+                    method: isEditing ? 'PUT' : 'POST',
+                    body: JSON.stringify(payload),
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    const error = data.errors ? Object.values(data.errors)[0] : data.message;
+                    setCreateMessage(error || 'Falha ao cadastrar colaborador.', 'error');
+                    return;
+                }
+
+                resetCollaboratorForm();
+                setCreateMessage(data.message, 'success');
+
+                if (data.credentials) {
+                    generatedCredentials.style.display = 'none';
+                    showToast({
+                        title: `Credenciais de ${data.collaborator.name}`,
+                        message: 'Acesso inicial criado e pronto para uso.',
+                        type: 'success',
+                        chips: [
+                            `Codigo ${data.credentials.access_code}`,
+                            `PIN ${data.credentials.pin}`,
+                        ],
+                        duration: 9000,
+                    });
+                }
+
+                await Promise.all([loadManagedCollaborators(), loadCollaborators(), loadDashboard()]);
             });
-            const data = await response.json();
+        }
 
-            if (!response.ok) {
-                const error = data.errors ? Object.values(data.errors)[0] : data.message;
-                setCreateMessage(error || 'Falha ao cadastrar colaborador.', 'error');
-                return;
+        if (roster) {
+            roster.addEventListener('click', async (event) => {
+                const button = event.target.closest('button[data-action]');
+                if (!button) {
+                    return;
+                }
+
+                const collaboratorId = Number(button.dataset.id);
+                const collaborator = state.collaborators.find((item) => item.id === collaboratorId);
+                if (!collaborator) {
+                    return;
+                }
+
+                if (button.dataset.action === 'view') {
+                    if (canViewProductivity && collaboratorSelect) {
+                        collaboratorSelect.value = String(collaboratorId);
+                        await loadDashboard();
+                        profileDashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        showToast({
+                            title: 'Subdashboard carregado',
+                            message: `Perfil individual de ${collaborator.name} aberto no painel.`,
+                            type: 'info',
+                            duration: 2600,
+                        });
+                    } else {
+                        window.location.href = `${productivityPageUrl}?collaborator_id=${collaboratorId}`;
+                    }
+                    return;
+                }
+
+                if (state.currentUser?.role !== 'administrador') {
+                    return;
+                }
+
+                if (button.dataset.action === 'edit') {
+                    fillCollaboratorForm(collaborator);
+                    showToast({
+                        title: 'Modo de edicao',
+                        message: `Agora voce esta a editar ${collaborator.name}.`,
+                        type: 'info',
+                        duration: 2800,
+                    });
+                    return;
+                }
+
+                if (button.dataset.action === 'delete') {
+                    const confirmed = window.confirm(`Deseja realmente apagar ${collaborator.name}?`);
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    const response = await authorizedFetch(`/api/management/collaborators/${collaboratorId}`, {
+                        method: 'DELETE',
+                    });
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        const error = data.errors ? Object.values(data.errors)[0] : data.message;
+                        setCreateMessage(error || 'Falha ao apagar colaborador.', 'error');
+                        return;
+                    }
+
+                    if (state.editingCollaborator?.id === collaboratorId) {
+                        resetCollaboratorForm();
+                    }
+
+                    setCreateMessage(data.message, 'success');
+                    await Promise.all([loadManagedCollaborators(), loadCollaborators(), loadDashboard()]);
+                }
+            });
+        }
+
+        if (recentOrders) {
+            recentOrders.addEventListener('click', (event) => {
+                const button = event.target.closest('button[data-order-id]');
+                if (!button) {
+                    return;
+                }
+
+                const orderId = Number(button.dataset.orderId);
+                const order = state.recentOrders.find((item) => item.id === orderId);
+                if (!order) {
+                    return;
+                }
+
+                renderSaleToast(order);
+            });
+        }
+
+        if (saleToastClose) {
+            saleToastClose.addEventListener('click', closeSaleToast);
+        }
+        if (saleToastOverlay) {
+            saleToastOverlay.addEventListener('click', (event) => {
+                if (event.target === saleToastOverlay) {
+                    closeSaleToast();
+                }
+            });
+        }
+        document.addEventListener('keydown', (event) => {
+            if (canViewProductivity && saleToastOverlay && event.key === 'Escape' && saleToastOverlay.classList.contains('open')) {
+                closeSaleToast();
             }
-
-            createForm.reset();
-            updateRoleOptions();
-            setCreateMessage(data.message, 'success');
-            generatedCredentials.style.display = 'block';
-            generatedCredentials.innerHTML = `
-                <div class="label">Credenciais geradas</div>
-                <div class="value">${data.collaborator.name}</div>
-                <div style="margin-top:0.4rem;">Codigo de acesso: <strong>${data.credentials.access_code}</strong></div>
-                <div>PIN inicial: <strong>${data.credentials.pin}</strong></div>
-            `;
-
-            await Promise.all([loadManagedCollaborators(), loadCollaborators(), loadDashboard()]);
         });
+
+        if (cancelEditButton) {
+            cancelEditButton.addEventListener('click', () => {
+                setCreateMessage('');
+                resetCollaboratorForm();
+                showToast({
+                    title: 'Edicao cancelada',
+                    message: 'O formulario voltou para o modo de criacao.',
+                    type: 'info',
+                    duration: 2400,
+                });
+            });
+        }
 
         document.getElementById('logout-button').addEventListener('click', () => {
             localStorage.removeItem('access_token');
             localStorage.removeItem('auth_user');
             window.location.href = '/login';
         });
-        document.getElementById('refresh-button').addEventListener('click', loadDashboard);
-        document.getElementById('refresh-roster-button').addEventListener('click', loadManagedCollaborators);
-        periodSelect.addEventListener('change', loadDashboard);
-        collaboratorSelect.addEventListener('change', loadDashboard);
+        if (periodSelect) {
+            periodSelect.addEventListener('change', loadDashboard);
+        }
+        if (collaboratorSelect) {
+            collaboratorSelect.addEventListener('change', loadDashboard);
+        }
 
-        Promise.all([loadCurrentUser(), loadManagedCollaborators(), loadCollaborators()]).then(loadDashboard);
-        setInterval(loadDashboard, 20000);
+        Promise.all([
+            loadCurrentUser(),
+            canManageTeam ? loadManagedCollaborators() : Promise.resolve(),
+            canViewProductivity ? loadCollaborators() : Promise.resolve(),
+        ]).then(() => {
+            if (canManageTeam) {
+                resetCollaboratorForm();
+            }
+            if (canViewProductivity) {
+                if (initialCollaboratorId && collaboratorSelect && Array.from(collaboratorSelect.options).some((option) => option.value === String(initialCollaboratorId))) {
+                    collaboratorSelect.value = String(initialCollaboratorId);
+                }
+                loadDashboard();
+            }
+        });
+        if (canViewProductivity) {
+            setInterval(loadDashboard, 20000);
+        }
     </script>
 </body>
 </html>

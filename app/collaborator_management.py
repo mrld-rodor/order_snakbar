@@ -99,3 +99,66 @@ def create_collaborator_account(actor, payload):
     db.session.commit()
 
     return collaborator, {"access_code": access_code, "pin": pin}, None
+
+
+def update_collaborator_account(actor, collaborator_id, payload):
+    if actor is None or actor.role != "administrador":
+        return None, None, {"permission": "Apenas o administrador pode editar colaboradores."}
+
+    collaborator = Collaborator.query.get(collaborator_id)
+    if collaborator is None:
+        return None, None, {"collaborator": "Colaborador nao encontrado."}
+
+    name = (payload.get("name") or "").strip()
+    email = (payload.get("email") or "").strip().lower()
+    role = (payload.get("role") or collaborator.role).strip().lower()
+    active = payload.get("active")
+    errors = {}
+
+    if not name:
+        errors["name"] = "Informe o nome do colaborador."
+    if not email:
+        errors["email"] = "Informe o email do colaborador."
+    if role not in MANAGEABLE_ROLES:
+        errors["role"] = "Perfil invalido para edicao."
+
+    existing = Collaborator.query.filter_by(email=email).first() if email else None
+    if existing is not None and existing.id != collaborator.id:
+        errors["email"] = "Ja existe um colaborador com este email."
+
+    if errors:
+        return None, None, errors
+
+    collaborator.name = name
+    collaborator.email = email
+    collaborator.role = role
+    if active is not None:
+        collaborator.active = bool(active)
+    changed, generated_pin = ensure_collaborator_access(collaborator)
+
+    db.session.commit()
+    credentials = None
+    if changed and generated_pin:
+        credentials = {"access_code": collaborator.access_code, "pin": generated_pin}
+
+    return collaborator, credentials, None
+
+
+def delete_collaborator_account(actor, collaborator_id):
+    if actor is None or actor.role != "administrador":
+        return None, {"permission": "Apenas o administrador pode apagar colaboradores."}
+
+    collaborator = Collaborator.query.get(collaborator_id)
+    if collaborator is None:
+        return None, {"collaborator": "Colaborador nao encontrado."}
+    if actor.id == collaborator.id:
+        return None, {"collaborator": "O administrador nao pode apagar a propria conta."}
+
+    if collaborator.orders or collaborator.payments:
+        collaborator.active = False
+        db.session.commit()
+        return "deactivated", None
+
+    db.session.delete(collaborator)
+    db.session.commit()
+    return "deleted", None

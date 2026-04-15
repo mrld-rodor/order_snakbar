@@ -21,7 +21,12 @@ from app.auth import (
     public_user_data,
     role_required,
 )
-from app.collaborator_management import create_collaborator_account, list_manageable_collaborators
+from app.collaborator_management import (
+    create_collaborator_account,
+    delete_collaborator_account,
+    list_manageable_collaborators,
+    update_collaborator_account,
+)
 from app.collaborator_ordering import (
     add_product_to_table_ticket,
     apply_discount_to_ticket,
@@ -59,6 +64,17 @@ def operations_page():
         "collaborator_panel.html",
         app_name=current_app.config["APP_NAME"],
         page_title="Tela Central de Vendas",
+        page_description="Tela central da operacao: escolha a mesa, valide a credencial do responsavel, continue a venda ou lance novos pedidos em tempo real.",
+    )
+
+
+@main_blueprint.get("/chefia/vendas")
+def floor_chief_sales_page():
+    return render_template(
+        "collaborator_panel.html",
+        app_name=current_app.config["APP_NAME"],
+        page_title="Painel de Vendas da Chefia",
+        page_description="Painel operacional da chefia: acompanhe mesas abertas, altere qualquer venda ativa e feche qualquer conta quando necessario.",
     )
 
 
@@ -73,6 +89,7 @@ def admin_products_dashboard_page():
         "admin_sales.html",
         app_name=current_app.config["APP_NAME"],
         page_title="Painel de Produtos e Vendas",
+        active_admin_tab="produtos",
     )
 
 
@@ -81,8 +98,34 @@ def admin_collaborators_page():
     return render_template(
         "admin_collaborators.html",
         app_name=current_app.config["APP_NAME"],
-        page_title="Painel de Colaboradores",
+        page_title="Produtividade da Equipa",
         show_admin_nav=True,
+        show_management=False,
+        show_productivity=True,
+        productivity_url=url_for("main.admin_collaborators_page"),
+        management_url=url_for("main.admin_collaborators_management_page"),
+        sales_url=url_for("main.operations_page"),
+        active_collaborator_tab="produtividade",
+        initial_collaborator_id=request.args.get("collaborator_id", type=int),
+        active_admin_tab="colaboradores",
+    )
+
+
+@main_blueprint.get("/admin/colaboradores/gerenciamento")
+def admin_collaborators_management_page():
+    return render_template(
+        "admin_collaborators.html",
+        app_name=current_app.config["APP_NAME"],
+        page_title="Gerenciamento de Colaboradores",
+        show_admin_nav=True,
+        show_management=True,
+        show_productivity=False,
+        productivity_url=url_for("main.admin_collaborators_page"),
+        management_url=url_for("main.admin_collaborators_management_page"),
+        sales_url=url_for("main.operations_page"),
+        active_collaborator_tab="gerenciamento",
+        initial_collaborator_id=None,
+        active_admin_tab="colaboradores",
     )
 
 
@@ -91,8 +134,32 @@ def floor_chief_page():
     return render_template(
         "admin_collaborators.html",
         app_name=current_app.config["APP_NAME"],
-        page_title="Painel da Chefia de Sala",
+        page_title="Produtividade da Chefia",
         show_admin_nav=False,
+        show_management=False,
+        show_productivity=True,
+        productivity_url=url_for("main.floor_chief_page"),
+        management_url=url_for("main.floor_chief_management_page"),
+        sales_url=url_for("main.floor_chief_sales_page"),
+        active_collaborator_tab="produtividade",
+        initial_collaborator_id=request.args.get("collaborator_id", type=int),
+    )
+
+
+@main_blueprint.get("/chefia/colaboradores")
+def floor_chief_management_page():
+    return render_template(
+        "admin_collaborators.html",
+        app_name=current_app.config["APP_NAME"],
+        page_title="Gerenciamento da Chefia",
+        show_admin_nav=False,
+        show_management=True,
+        show_productivity=False,
+        productivity_url=url_for("main.floor_chief_page"),
+        management_url=url_for("main.floor_chief_management_page"),
+        sales_url=url_for("main.floor_chief_sales_page"),
+        active_collaborator_tab="gerenciamento",
+        initial_collaborator_id=None,
     )
 
 
@@ -104,6 +171,7 @@ def admin_catalog_page():
         expected_role="administrador",
         page_title="Painel de Catalogo",
         api_endpoint="/api/admin/area",
+        active_admin_tab="catalogo",
     )
 
 
@@ -419,6 +487,51 @@ def management_create_collaborator():
             "credentials": credentials,
         }
     ), 201
+
+
+@main_blueprint.put("/api/management/collaborators/<int:collaborator_id>")
+@role_required("administrador")
+def management_update_collaborator(collaborator_id):
+    collaborator = get_current_collaborator()
+    if collaborator is None:
+        return jsonify({"message": "Usuario autenticado nao encontrado."}), 404
+
+    updated, credentials, errors = update_collaborator_account(
+        collaborator,
+        collaborator_id,
+        request.get_json(silent=True) or {},
+    )
+    if errors:
+        return jsonify({"message": "Falha ao atualizar colaborador.", "errors": errors}), 400
+
+    response = {
+        "message": "Colaborador atualizado com sucesso.",
+        "collaborator": updated.to_public_dict(),
+    }
+    if credentials:
+        response["credentials"] = credentials
+    return jsonify(response)
+
+
+@main_blueprint.delete("/api/management/collaborators/<int:collaborator_id>")
+@role_required("administrador")
+def management_delete_collaborator(collaborator_id):
+    collaborator = get_current_collaborator()
+    if collaborator is None:
+        return jsonify({"message": "Usuario autenticado nao encontrado."}), 404
+
+    action, errors = delete_collaborator_account(collaborator, collaborator_id)
+    if errors:
+        return jsonify({"message": "Falha ao apagar colaborador.", "errors": errors}), 400
+
+    if action == "deactivated":
+        return jsonify(
+            {
+                "message": "Colaborador desativado porque possui historico operacional.",
+                "action": action,
+            }
+        )
+    return jsonify({"message": "Colaborador removido com sucesso.", "action": action})
 
 
 @main_blueprint.get("/health")

@@ -49,6 +49,39 @@
             gap: 0.8rem;
         }
 
+        .operations-nav {
+            display: none;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .operations-nav.visible {
+            display: flex;
+        }
+
+        .operations-nav a {
+            text-decoration: none;
+        }
+
+        .operations-nav-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 1rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--accent-soft);
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .operations-nav-link.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            border-color: transparent;
+        }
+
         .card {
             background: var(--panel);
             border: 1px solid var(--border);
@@ -104,6 +137,20 @@
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
+        .ticket-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .ticket-overview-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1rem;
+        }
+
         .metric, .table-button, .category-button, .product-card, .ticket-line {
             background: #fff;
             border: 1px solid var(--border);
@@ -132,8 +179,21 @@
             text-align: left;
         }
 
+        .table-button.open {
+            background: linear-gradient(180deg, #fff4dd, #f7e3b8);
+            border-color: #d8b36a;
+            color: #5d4312;
+            box-shadow: inset 0 0 0 1px rgba(216, 179, 106, 0.18);
+        }
+
         .category-button.active, .table-button.active {
             background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            border-color: transparent;
+        }
+
+        .table-button.open.active {
+            background: linear-gradient(135deg, #b56a32, #7f451f);
             color: white;
             border-color: transparent;
         }
@@ -236,6 +296,46 @@
             margin-top: 1rem;
         }
 
+        .ticket-calculator {
+            margin-top: 1rem;
+            border: 1px solid #2d372f;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #1d2520, #141a17);
+            color: #dff5e6;
+            padding: 1rem;
+            box-shadow: 0 14px 30px rgba(20, 26, 23, 0.22);
+        }
+
+        .ticket-calculator-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: #9dc9ab;
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .ticket-calculator-display {
+            display: grid;
+            gap: 0.55rem;
+            font-family: "Courier New", monospace;
+        }
+
+        .ticket-calculator-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: baseline;
+        }
+
+        .ticket-calculator-row strong {
+            font-size: 1.2rem;
+            color: #ffffff;
+        }
+
         .credentials-card {
             background: #fff;
             border: 1px solid var(--border);
@@ -326,7 +426,7 @@
 
         .terminal-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: minmax(0, 1fr);
             gap: 0.75rem;
         }
 
@@ -335,6 +435,7 @@
             border-radius: 14px;
             padding: 0.85rem;
             background: rgba(10, 18, 15, 0.68);
+            min-width: 0;
         }
 
         .terminal-label {
@@ -349,70 +450,167 @@
             color: #f2fff6;
             font-size: 1rem;
             font-weight: 700;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         .terminal-subvalue {
             margin-top: 0.35rem;
             color: #b7e8c8;
             font-size: 0.88rem;
+            line-height: 1.4;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .terminal-stack {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .terminal-row {
+            display: grid;
+            grid-template-columns: 150px minmax(0, 1fr);
+            gap: 0.85rem;
+            align-items: start;
+            padding: 0.7rem 0;
+            border-bottom: 1px solid rgba(191, 249, 211, 0.12);
+        }
+
+        .terminal-row:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .terminal-row:first-child {
+            padding-top: 0;
+        }
+
+        .terminal-key {
+            color: #7ddfa3;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .terminal-data {
+            min-width: 0;
+            color: #f2fff6;
+            font-size: 0.96rem;
+            font-weight: 700;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .terminal-data.muted {
+            color: #b7e8c8;
+            font-weight: 500;
         }
 
         .ticket-register {
+            margin-top: 1rem;
+            display: grid;
+            gap: 0.9rem;
+        }
+
+        .ticket-lines {
             display: grid;
             gap: 0.75rem;
         }
 
         .ticket-line {
             display: grid;
-            gap: 0.7rem;
-            padding: 0.95rem 1rem;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
             border-radius: 18px;
-            background: #fffaf4;
+            background: #fff;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 22px rgba(58, 34, 24, 0.05);
         }
 
-        .ticket-line-top {
-            display: flex;
-            justify-content: space-between;
-            gap: 0.75rem;
-            align-items: start;
+        .ticket-line-main {
+            min-width: 0;
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .ticket-line-name {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #32251d;
+            overflow-wrap: anywhere;
         }
 
         .ticket-line-meta {
-            color: var(--muted);
-            font-size: 0.92rem;
-        }
-
-        .register-actions {
             display: flex;
-            align-items: center;
-            gap: 0.55rem;
+            gap: 0.45rem;
             flex-wrap: wrap;
         }
 
+        .ticket-line-meta .chip {
+            background: #f3e6da;
+            color: #6b4735;
+        }
+
+        .receipt-actions {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        .receipt-qty {
+            min-width: 3rem;
+            height: 2.5rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #fff8f1;
+            font-weight: 800;
+            color: #3a2a20;
+        }
+
         .register-button {
-            width: 2.3rem;
-            height: 2.3rem;
+            width: 2.5rem;
+            height: 2.5rem;
             border: 0;
             border-radius: 12px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font: inherit;
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             font-weight: 800;
             cursor: pointer;
             color: #fff;
             background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            box-shadow: 0 10px 18px rgba(120, 64, 31, 0.18);
         }
 
         .register-button.subtle {
             background: #eadccf;
             color: var(--text);
+            box-shadow: none;
         }
 
         .register-button:disabled {
             opacity: 0.45;
             cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .receipt-empty {
+            padding: 1.15rem 1rem;
+            color: var(--muted);
+            font-style: italic;
+            border: 1px dashed var(--border);
+            border-radius: 18px;
+            background: #fff;
         }
 
         .toast-stack {
@@ -521,6 +719,29 @@
         @media (max-width: 1120px) {
             .layout { grid-template-columns: 1fr; }
         }
+
+        @media (max-width: 620px) {
+            .ticket-overview-grid,
+            .terminal-row {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 0.35rem;
+            }
+
+            .ticket-line {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 0.7rem;
+            }
+
+            .receipt-actions {
+                justify-content: flex-start;
+            }
+
+            .ticket-calculator-row {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -529,13 +750,14 @@
             <div>
                 <p>{{ app_name }}</p>
                 <h1>{{ page_title }}</h1>
-                <p class="muted">Tela central da operacao: escolha a mesa, valide a credencial do responsavel, continue a venda ou lance novos pedidos em tempo real.</p>
+                <p class="muted">{{ page_description or 'Tela central da operacao: escolha a mesa, valide a credencial do responsavel, continue a venda ou lance novos pedidos em tempo real.' }}</p>
             </div>
             <div class="topbar-actions">
-                <button id="refresh-button" type="button" class="secondary">Atualizar</button>
                 <button id="logout-button" type="button" class="primary">Sair</button>
             </div>
         </div>
+
+        <nav id="operations-nav" class="operations-nav" aria-label="Navegacao da operacao"></nav>
 
         <section class="card">
             <div id="metrics" class="metrics"></div>
@@ -567,17 +789,17 @@
             <section class="card">
                 <h2 class="section-title">Ticket da mesa</h2>
                 <div id="selected-table-label" class="muted">Nenhuma mesa selecionada.</div>
-                <div class="terminal-shell">
-                    <div class="terminal-topbar">
-                        <div style="display:flex; align-items:center; gap:0.65rem;">
-                            <span class="terminal-led"></span>
-                            <strong>Terminal da Mesa</strong>
-                        </div>
-                        <div id="terminal-status" style="font-size:0.88rem; color:#d8f6e2;">Aguardando selecao</div>
-                    </div>
-                    <div id="owner-credentials-card" class="terminal-screen"></div>
+                <div id="owner-credentials-card" class="ticket-overview-grid"></div>
+                <div class="ticket-register">
+                    <div id="ticket-lines" class="ticket-lines"></div>
                 </div>
-                <div id="ticket-summary" class="summary-grid" style="margin-top: 1rem;"></div>
+                <div id="ticket-calculator" class="ticket-calculator">
+                    <div class="ticket-calculator-head">
+                        <span>Somatorio da mesa</span>
+                        <span>visor</span>
+                    </div>
+                    <div id="ticket-calculator-display" class="ticket-calculator-display"></div>
+                </div>
                 <div class="ticket-controls">
                     <div class="inline-form">
                         <label for="discount-input" class="muted">Desconto da mesa</label>
@@ -596,9 +818,6 @@
                         <button id="close-ticket-button" class="primary" type="button">Fechar conta</button>
                     </div>
                 </div>
-                <div id="ticket-lines" class="ticket-lines" style="margin-top: 1rem;"></div>
-                <h3 style="margin-top: 1.4rem;">Resposta tecnica</h3>
-                <pre id="technical-response">Carregando...</pre>
             </section>
         </div>
 
@@ -633,24 +852,25 @@
             currentTicket: null,
             pendingAdd: null,
             floorChief: null,
+            refreshInFlight: false,
+            tablesSignature: '',
         };
 
         const metrics = document.getElementById('metrics');
+        const operationsNav = document.getElementById('operations-nav');
         const categoryList = document.getElementById('category-list');
         const tablesGrid = document.getElementById('tables-grid');
         const productsGrid = document.getElementById('products-grid');
-        const ticketSummary = document.getElementById('ticket-summary');
         const ticketLines = document.getElementById('ticket-lines');
         const actionMessage = document.getElementById('action-message');
         const selectedTableLabel = document.getElementById('selected-table-label');
         const productsCaption = document.getElementById('products-caption');
-        const technicalResponse = document.getElementById('technical-response');
         const discountInput = document.getElementById('discount-input');
+        const ticketCalculatorDisplay = document.getElementById('ticket-calculator-display');
         const ownerCredentialsCard = document.getElementById('owner-credentials-card');
         const paymentMethodSelect = document.getElementById('payment-method-select');
         const closeTicketButton = document.getElementById('close-ticket-button');
         const tableWarningBanner = document.getElementById('table-warning-banner');
-        const terminalStatus = document.getElementById('terminal-status');
         const addConfirmationModal = document.getElementById('add-confirmation-modal');
         const addConfirmationMessage = document.getElementById('add-confirmation-message');
         const addConfirmationDetails = document.getElementById('add-confirmation-details');
@@ -679,6 +899,39 @@
             }, 3200);
         }
 
+        function renderOperationsNav() {
+            const role = state.user?.role;
+            const currentPath = window.location.pathname;
+            const links = [];
+
+            if (role === 'administrador') {
+                links.push(
+                    { href: '/operacao', label: 'Painel de vendas' },
+                    { href: '/admin/produtos', label: 'Produtos e vendas' },
+                    { href: '/admin/colaboradores', label: 'Colaboradores' },
+                    { href: '/admin/catalogo', label: 'Catalogo e CRUD' },
+                );
+            } else if (role === 'chefe_sala') {
+                links.push(
+                    { href: '/chefia/vendas', label: 'Painel de vendas' },
+                    { href: '/chefia', label: 'Produtividade' },
+                    { href: '/chefia/colaboradores', label: 'Gerenciamento' },
+                );
+            }
+
+            operationsNav.innerHTML = '';
+            operationsNav.classList.toggle('visible', links.length > 0);
+
+            links.forEach((link) => {
+                const anchor = document.createElement('a');
+                anchor.href = link.href;
+                const isActive = currentPath === link.href;
+                anchor.className = `operations-nav-link${isActive ? ' active' : ''}`;
+                anchor.textContent = link.label;
+                operationsNav.appendChild(anchor);
+            });
+        }
+
         function setTableWarning(text = '') {
             tableWarningBanner.textContent = text;
             tableWarningBanner.classList.toggle('visible', Boolean(text));
@@ -693,6 +946,35 @@
 
         function selectedTable() {
             return state.tables.find((table) => table.id === state.selectedTableId) || null;
+        }
+
+        function buildTablesSignature(tables) {
+            return (tables || [])
+                .map((table) => `${table.id}:${table.has_open_ticket ? '1' : '0'}:${table.ticket?.id || 0}`)
+                .join('|');
+        }
+
+        function summarizeTableChanges(previousTables, nextTables) {
+            const previousMap = new Map((previousTables || []).map((table) => [table.id, table]));
+            let openedCount = 0;
+            let closedCount = 0;
+
+            (nextTables || []).forEach((table) => {
+                const previous = previousMap.get(table.id);
+                if (!previous) {
+                    return;
+                }
+
+                if (!previous.has_open_ticket && table.has_open_ticket) {
+                    openedCount += 1;
+                }
+
+                if (previous.has_open_ticket && !table.has_open_ticket) {
+                    closedCount += 1;
+                }
+            });
+
+            return { openedCount, closedCount };
         }
 
         function closeAddConfirmation() {
@@ -790,56 +1072,71 @@
                 card.innerHTML = `<div class="label">${item.label}</div><div class="value">${item.value}</div>`;
                 metrics.appendChild(card);
             });
+
+            renderOperationsNav();
         }
 
         function renderOwnerCard(ticketPayload) {
             if (!state.selectedTableId) {
-                terminalStatus.textContent = 'Aguardando selecao';
-                ownerCredentialsCard.innerHTML = '<div class="terminal-box"><div class="terminal-label">Sistema</div><div class="terminal-value">Selecione uma mesa para abrir o terminal operacional.</div></div>';
+                ownerCredentialsCard.innerHTML = '<div class="empty" style="grid-column:1 / -1;">Selecione uma mesa para ver o ticket e os produtos consumidos.</div>';
                 return;
             }
 
+            const table = selectedTable();
             const owner = ticketPayload?.owner || state.user;
             const floorChief = state.floorChief;
-            const saleCredentials = ticketPayload?.sale_credentials || {
-                username: state.user?.access_code || state.user?.email || '-',
-                password: 'Gerada ao abrir a venda',
-            };
-            const permissions = ticketPayload?.permissions || { can_manage: true, can_close: true, is_owner: true };
-            const note = ticketPayload
-                ? (permissions.can_manage
-                    ? 'Voce pode continuar esta venda porque e o responsavel pela mesa ou possui perfil de gestao.'
-                    : 'Esta mesa esta bloqueada para alteracoes por outro colaborador. Apenas a chefia, o administrador ou o responsavel podem mexer nela.')
-                : 'A primeira venda aberta nesta mesa ficara vinculada a estas credenciais e sera contabilizada para as metricas do responsavel.';
-
-            terminalStatus.textContent = ticketPayload ? `Mesa ${ticketPayload.table_number} em operacao` : `Mesa ${selectedTable()?.number} pronta para abrir`;
-
             ownerCredentialsCard.innerHTML = `
-                <div class="terminal-box">
-                    <div class="terminal-label">Leitura Operacional</div>
-                    <div class="terminal-value">${note}</div>
+                <div class="ticket-overview-card">
+                    <div class="label">Ticket</div>
+                    <div class="value">${ticketPayload ? `#${ticketPayload.id}` : 'Sem ticket'}</div>
                 </div>
-                <div class="terminal-grid">
-                    <div class="terminal-box">
-                        <div class="terminal-label">Chefe de Sala</div>
-                        <div class="terminal-value">${floorChief?.name || 'Nao definido'}</div>
-                        <div class="terminal-subvalue">${floorChief?.access_code || floorChief?.email || 'Sem credencial ativa'}</div>
-                    </div>
-                    <div class="terminal-box">
-                        <div class="terminal-label">Responsavel da Mesa</div>
-                        <div class="terminal-value">${owner?.name || 'Sem responsavel definido'}</div>
-                        <div class="terminal-subvalue">${owner?.access_code || owner?.email || '-'}</div>
-                    </div>
+                <div class="ticket-overview-card">
+                    <div class="label">Mesa</div>
+                    <div class="value">${ticketPayload?.table_number || table?.number || '-'}</div>
                 </div>
-                <div class="terminal-grid">
-                    <div class="terminal-box">
-                        <div class="terminal-label">Utilizador da Venda</div>
-                        <div class="terminal-value">${saleCredentials.username || '-'}</div>
+                <div class="ticket-overview-card">
+                    <div class="label">Chefe de sala</div>
+                    <div class="value">${floorChief?.name || 'Nao definido'}</div>
+                </div>
+                <div class="ticket-overview-card">
+                    <div class="label">Colaborador</div>
+                    <div class="value">${owner?.name || 'Sem responsavel definido'}</div>
+                </div>
+            `;
+        }
+
+        function renderTicketCalculator(ticketPayload) {
+            if (!ticketPayload) {
+                ticketCalculatorDisplay.innerHTML = `
+                    <div class="ticket-calculator-row">
+                        <span>Subtotal</span>
+                        <strong>${currency(0)}</strong>
                     </div>
-                    <div class="terminal-box">
-                        <div class="terminal-label">Senha Temporaria</div>
-                        <div class="terminal-value">${saleCredentials.password || 'Nao disponivel'}</div>
+                    <div class="ticket-calculator-row">
+                        <span>Total de itens</span>
+                        <strong>0</strong>
                     </div>
+                `;
+                return;
+            }
+
+            const itemsCount = (ticketPayload.items || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+            ticketCalculatorDisplay.innerHTML = `
+                <div class="ticket-calculator-row">
+                    <span>Subtotal</span>
+                    <strong>${currency(ticketPayload.subtotal)}</strong>
+                </div>
+                <div class="ticket-calculator-row">
+                    <span>Desconto</span>
+                    <strong>${currency(ticketPayload.discount_amount)}</strong>
+                </div>
+                <div class="ticket-calculator-row">
+                    <span>Total</span>
+                    <strong>${currency(ticketPayload.total)}</strong>
+                </div>
+                <div class="ticket-calculator-row">
+                    <span>Itens na mesa</span>
+                    <strong>${itemsCount}</strong>
                 </div>
             `;
         }
@@ -881,7 +1178,7 @@
             state.tables.forEach((table) => {
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.className = `table-button${state.selectedTableId === table.id ? ' active' : ''}`;
+                button.className = `table-button${table.has_open_ticket ? ' open' : ''}${state.selectedTableId === table.id ? ' active' : ''}`;
                 button.innerHTML = `Mesa ${table.number}<small>${table.has_open_ticket ? 'Ticket aberto' : 'Sem ticket'}</small>`;
                 button.addEventListener('click', async () => {
                     state.selectedTableId = table.id;
@@ -959,57 +1256,43 @@
         function renderTicket(ticketPayload) {
             const table = state.tables.find((entry) => entry.id === state.selectedTableId);
             selectedTableLabel.textContent = table ? `Mesa ${table.number}` : 'Nenhuma mesa selecionada.';
-            ticketSummary.innerHTML = '';
             ticketLines.innerHTML = '';
 
             if (!ticketPayload) {
                 renderOwnerCard(null);
+                renderTicketCalculator(null);
                 syncActionState();
                 setTableWarning('');
-                ticketSummary.innerHTML = '<div class="empty" style="grid-column:1 / -1;">Nenhum ticket aberto nesta mesa ainda.</div>';
-                technicalResponse.textContent = JSON.stringify({ table, ticket: null }, null, 2);
+                ticketLines.innerHTML = '<div class="receipt-empty">Nenhum item lancado nesta mesa ainda.</div>';
                 return;
             }
 
             renderOwnerCard(ticketPayload);
+            renderTicketCalculator(ticketPayload);
             if (ticketPayload.permissions?.can_manage === false) {
                 setMessage(`Mesa ${ticketPayload.table_number} em consulta: ${ticketPayload.owner?.name || 'Outro colaborador'} abriu esta venda.`, 'warning', false);
             }
 
-            const summaryCards = [
-                { label: 'Ticket', value: `#${ticketPayload.id}` },
-                { label: 'Status', value: ticketPayload.status },
-                { label: 'Colaborador', value: ticketPayload.collaborator || '-' },
-                { label: 'Subtotal', value: currency(ticketPayload.subtotal) },
-                { label: 'Desconto', value: currency(ticketPayload.discount_amount) },
-                { label: 'Total', value: currency(ticketPayload.total) },
-            ];
-
-            summaryCards.forEach((item) => {
-                const card = document.createElement('div');
-                card.className = 'metric';
-                card.innerHTML = `<div class="label">${item.label}</div><div class="value">${item.value}</div>`;
-                ticketSummary.appendChild(card);
-            });
-
             if (!ticketPayload.items.length) {
-                ticketLines.innerHTML = '<div class="empty">Ticket criado sem itens.</div>';
+                ticketLines.innerHTML = '<div class="receipt-empty">Ticket aberto, mas ainda sem itens registados.</div>';
             } else {
                 ticketPayload.items.forEach((item) => {
                     const line = document.createElement('div');
                     const disableLineActions = !ticketPayload.permissions?.can_manage;
                     line.className = 'ticket-line';
                     line.innerHTML = `
-                        <div class="ticket-line-top">
-                            <div>
-                                <strong>${item.name}</strong>
-                                <div class="ticket-line-meta">Unitario: ${currency(item.unit_price)} | Total: ${currency(item.line_total)}</div>
+                        <div class="ticket-line-main">
+                            <div class="ticket-line-name">${item.name}</div>
+                            <div class="ticket-line-meta">
+                                <span class="chip">Qtd ${item.quantity}</span>
+                                <span class="chip">Unitario ${currency(item.unit_price)}</span>
+                                <span class="chip">Total ${currency(item.line_total)}</span>
                             </div>
-                            <div class="register-actions">
-                                <button class="register-button subtle" type="button" data-role="decrement-item" ${disableLineActions ? 'disabled' : ''}>-</button>
-                                <div class="qty-input" style="display:inline-flex; align-items:center; justify-content:center;">${item.quantity}</div>
-                                <button class="register-button" type="button" data-role="increment-item" ${disableLineActions ? 'disabled' : ''}>+</button>
-                            </div>
+                        </div>
+                        <div class="receipt-actions">
+                            <button class="register-button subtle" type="button" title="Remover uma unidade" data-role="decrement-item" ${disableLineActions ? 'disabled' : ''}>-</button>
+                            <div class="receipt-qty">${item.quantity}</div>
+                            <button class="register-button" type="button" title="Adicionar uma unidade" data-role="increment-item" ${disableLineActions ? 'disabled' : ''}>+</button>
                         </div>
                     `;
                     line.querySelector('[data-role="increment-item"]').addEventListener('click', async () => {
@@ -1024,8 +1307,6 @@
 
             discountInput.value = ticketPayload.discount_amount || 0;
             syncActionState();
-
-            technicalResponse.textContent = JSON.stringify({ table, ticket: ticketPayload }, null, 2);
         }
 
         async function loadTicket(tableId) {
@@ -1195,37 +1476,68 @@
             await refreshTables();
         }
 
-        async function refreshTables() {
-            const bootstrapResponse = await authorizedFetch('/api/colaborador/ordering/bootstrap');
-            const bootstrapData = await bootstrapResponse.json();
-            state.user = bootstrapData.user;
-            state.floorChief = bootstrapData.floor_chief || null;
-            state.categories = bootstrapData.categories;
-            state.tables = bootstrapData.tables;
-            if (!state.selectedCategoryId && state.categories.length) {
-                state.selectedCategoryId = state.categories[0].id;
-            }
-            renderMetrics();
-            renderCategories();
-            renderTables();
-            renderProducts();
+        async function refreshTables(options = {}) {
+            const { silent = false } = options;
 
-            if (state.selectedTableId) {
-                const stillExists = state.tables.some((table) => table.id === state.selectedTableId);
-                if (stillExists) {
-                    await loadTicket(state.selectedTableId);
+            if (state.refreshInFlight) {
+                return;
+            }
+
+            state.refreshInFlight = true;
+            try {
+                const bootstrapResponse = await authorizedFetch('/api/colaborador/ordering/bootstrap');
+                const bootstrapData = await bootstrapResponse.json();
+                const previousTables = state.tables;
+                const previousSignature = state.tablesSignature;
+                const nextSignature = buildTablesSignature(bootstrapData.tables);
+
+                state.user = bootstrapData.user;
+                state.floorChief = bootstrapData.floor_chief || null;
+                state.categories = bootstrapData.categories;
+                state.tables = bootstrapData.tables;
+                state.tablesSignature = nextSignature;
+                if (!state.selectedCategoryId && state.categories.length) {
+                    state.selectedCategoryId = state.categories[0].id;
+                }
+                renderMetrics();
+                renderCategories();
+                renderTables();
+                renderProducts();
+
+                if (state.selectedTableId) {
+                    const stillExists = state.tables.some((table) => table.id === state.selectedTableId);
+                    if (stillExists) {
+                        await loadTicket(state.selectedTableId);
+                    } else {
+                        state.selectedTableId = null;
+                        state.currentTicket = null;
+                        renderTicket(null);
+                    }
                 } else {
-                    state.selectedTableId = null;
-                    state.currentTicket = null;
                     renderTicket(null);
                 }
-            } else {
-                renderTicket(null);
-            }
 
-            if (!state.selectedTableId) {
-                renderOwnerCard(null);
-                syncActionState();
+                if (!state.selectedTableId) {
+                    renderOwnerCard(null);
+                    syncActionState();
+                }
+
+                if (!silent && previousSignature && previousSignature !== nextSignature) {
+                    const changes = summarizeTableChanges(previousTables, state.tables);
+                    if (changes.openedCount > 0 && changes.closedCount > 0) {
+                        pushToast(`Atualizacao automatica: ${changes.openedCount} mesa(s) abertas e ${changes.closedCount} fechada(s).`, 'warning');
+                    } else if (changes.openedCount > 0) {
+                        pushToast(`Atualizacao automatica: ${changes.openedCount} mesa(s) aberta(s) agora visiveis para todos.`, 'success');
+                    } else if (changes.closedCount > 0) {
+                        pushToast(`Atualizacao automatica: ${changes.closedCount} mesa(s) encerrada(s).`, 'warning');
+                    }
+                }
+            } catch (error) {
+                if (!silent) {
+                    setMessage('Nao foi possivel sincronizar as mesas agora.', 'error', false);
+                }
+            } finally {
+                state.refreshInFlight = false;
             }
         }
 
@@ -1235,7 +1547,6 @@
             window.location.href = '/login';
         });
 
-        document.getElementById('refresh-button').addEventListener('click', refreshTables);
         document.getElementById('apply-discount-button').addEventListener('click', () => applyDiscount(discountInput.value));
         document.getElementById('clear-discount-button').addEventListener('click', () => applyDiscount(0));
         closeTicketButton.addEventListener('click', closeTicket);
@@ -1252,8 +1563,20 @@
             }
         });
 
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                refreshTables({ silent: true });
+            }
+        });
+
+        window.addEventListener('focus', () => {
+            refreshTables({ silent: true });
+        });
+
         refreshTables();
-        setInterval(refreshTables, 20000);
+        setInterval(() => {
+            refreshTables({ silent: true });
+        }, 4000);
     </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 <nav class="admin-nav">
-    <a href="/operacao">Tela central</a>
-    <a href="/admin/produtos">Produtos e vendas</a>
-    <a href="/admin/colaboradores">Colaboradores</a>
-    <a href="/admin/catalogo">Catalogo e CRUD</a>
+    <a href="/operacao" class="{% if active_admin_tab == 'operacao' %}active{% endif %}">Painel de vendas</a>
+    <a href="/admin/produtos" class="{% if active_admin_tab == 'produtos' %}active{% endif %}">Produtos e vendas</a>
+    <a href="/admin/colaboradores" class="{% if active_admin_tab == 'colaboradores' %}active{% endif %}">Colaboradores</a>
+    <a href="/admin/catalogo" class="{% if active_admin_tab == 'catalogo' %}active{% endif %}">Catalogo e CRUD</a>
 </nav>

@@ -66,7 +66,7 @@
             font-weight: 700;
         }
 
-        .admin-nav a:last-child {
+        .admin-nav a.active {
             color: white;
             background: linear-gradient(135deg, var(--accent), var(--accent-dark));
         }
@@ -214,6 +214,52 @@
             gap: 1rem;
         }
 
+        .catalog-selector {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .catalog-group-buttons {
+            display: flex;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+        }
+
+        .catalog-group-button {
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 0.75rem 1rem;
+            background: #efe3d8;
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .catalog-group-button.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            border-color: transparent;
+        }
+
+        .catalog-current-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            padding-bottom: 0.65rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .catalog-group-title {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .catalog-group-count {
+            color: var(--muted);
+            font-weight: 700;
+        }
+
         .product-card {
             border: 1px solid var(--border);
             border-radius: 18px;
@@ -292,7 +338,6 @@
                 <p class="muted">Gestao completa do catalogo com imagens e preservacao do historico de vendas.</p>
             </div>
             <div class="topbar-actions">
-                <button id="refresh-button" type="button" class="secondary">Atualizar dados</button>
                 <button id="logout-button" type="button">Sair</button>
             </div>
         </div>
@@ -407,6 +452,7 @@
             categories: [],
             products: [],
             editingProduct: null,
+            selectedCatalogGroup: null,
         };
 
         if (!token) {
@@ -429,10 +475,6 @@
             localStorage.removeItem('access_token');
             localStorage.removeItem('auth_user');
             window.location.href = '/login';
-        });
-
-        document.getElementById('refresh-button').addEventListener('click', () => {
-            initializePage();
         });
 
         document.getElementById('new-product-button').addEventListener('click', () => {
@@ -548,12 +590,75 @@
                 return;
             }
 
+            const groupedProducts = new Map();
             state.products.forEach((product) => {
+                const groupName = product.category || 'Sem categoria';
+                if (!groupedProducts.has(groupName)) {
+                    groupedProducts.set(groupName, []);
+                }
+                groupedProducts.get(groupName).push(product);
+            });
+
+            const categoryOrder = state.categories.map((category) => category.name);
+            const orderedGroupNames = Array.from(groupedProducts.keys()).sort((left, right) => {
+                const leftIndex = categoryOrder.indexOf(left);
+                const rightIndex = categoryOrder.indexOf(right);
+                if (leftIndex === -1 && rightIndex === -1) {
+                    return left.localeCompare(right);
+                }
+                if (leftIndex === -1) {
+                    return 1;
+                }
+                if (rightIndex === -1) {
+                    return -1;
+                }
+                return leftIndex - rightIndex;
+            });
+
+            if (!state.selectedCatalogGroup || !groupedProducts.has(state.selectedCatalogGroup)) {
+                state.selectedCatalogGroup = orderedGroupNames[0] || null;
+            }
+
+            const selector = document.createElement('div');
+            selector.className = 'catalog-selector';
+
+            const buttonsRow = document.createElement('div');
+            buttonsRow.className = 'catalog-group-buttons';
+
+            orderedGroupNames.forEach((groupName) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = `catalog-group-button${state.selectedCatalogGroup === groupName ? ' active' : ''}`;
+                button.textContent = groupName;
+                button.addEventListener('click', () => {
+                    state.selectedCatalogGroup = groupName;
+                    renderProducts();
+                });
+                buttonsRow.appendChild(button);
+            });
+
+            selector.appendChild(buttonsRow);
+
+            const activeGroupName = state.selectedCatalogGroup;
+            const activeProducts = groupedProducts.get(activeGroupName) || [];
+
+            const activeGroupHeader = document.createElement('div');
+            activeGroupHeader.className = 'catalog-current-group';
+            activeGroupHeader.innerHTML = `
+                <h3 class="catalog-group-title">${activeGroupName || 'Sem grupo'}</h3>
+                <div class="catalog-group-count">${activeProducts.length} produto(s)</div>
+            `;
+
+            selector.appendChild(activeGroupHeader);
+
+            const productsWrapper = document.createElement('div');
+            productsWrapper.className = 'products-grid';
+
+            activeProducts.forEach((product) => {
                 const card = document.createElement('article');
                 card.className = 'product-card';
 
                 const chips = [
-                    `<span class="chip">${product.category}</span>`,
                     product.is_vegan ? '<span class="chip">Vegan</span>' : '',
                     product.active ? '<span class="chip">Ativo</span>' : '<span class="chip">Inativo</span>',
                     `<span class="chip">${product.stock_status}</span>`,
@@ -574,8 +679,11 @@
                         </div>
                     </div>
                 `;
-                productsGrid.appendChild(card);
+                productsWrapper.appendChild(card);
             });
+
+            selector.appendChild(productsWrapper);
+            productsGrid.appendChild(selector);
         }
 
         function resetForm() {
