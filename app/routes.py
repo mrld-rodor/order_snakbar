@@ -163,6 +163,26 @@ def floor_chief_management_page():
     )
 
 
+@main_blueprint.get("/chefia/estoque")
+def floor_chief_stock_page():
+    return render_template(
+        "admin_products.html",
+        app_name=current_app.config["APP_NAME"],
+        page_title="Consulta de Estoque da Chefia",
+        page_description="Consulta operacional do catalogo: acompanhe estoque, alertas e disponibilidade dos produtos sem permissoes de edicao.",
+        show_admin_nav=False,
+        read_only=True,
+        overview_endpoint="/api/chefia/estoque/overview",
+        categories_endpoint="/api/chefia/categorias",
+        products_endpoint="/api/chefia/produtos",
+        sales_url=url_for("main.floor_chief_sales_page"),
+        productivity_url=url_for("main.floor_chief_page"),
+        management_url=url_for("main.floor_chief_management_page"),
+        stock_url=url_for("main.floor_chief_stock_page"),
+        active_chief_tab="estoque",
+    )
+
+
 @main_blueprint.get("/admin/catalogo")
 def admin_catalog_page():
     return render_template(
@@ -334,6 +354,19 @@ def admin_area():
     return jsonify(get_admin_dashboard())
 
 
+@main_blueprint.get("/api/chefia/estoque/overview")
+@role_required("chefe_sala")
+def floor_chief_stock_overview():
+    dashboard = get_admin_dashboard()
+    return jsonify(
+        {
+            "overview": dashboard.get("overview", {}),
+            "catalog": dashboard.get("catalog", {}),
+            "inventory": dashboard.get("inventory", {}),
+        }
+    )
+
+
 @main_blueprint.get("/api/colaborador/performance")
 @role_required("colaborador", "administrador", "chefe_sala")
 def collaborator_performance():
@@ -370,9 +403,28 @@ def admin_categories():
     return jsonify({"categories": [category.to_dict() for category in categories]})
 
 
+@main_blueprint.get("/api/chefia/categorias")
+@role_required("chefe_sala")
+def floor_chief_categories():
+    categories = MenuCategory.query.order_by(MenuCategory.display_order.asc()).all()
+    return jsonify({"categories": [category.to_dict() for category in categories]})
+
+
 @main_blueprint.get("/api/admin/products")
 @role_required("administrador")
 def admin_products():
+    include_inactive = request.args.get("include_inactive", "true").lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    return jsonify({"products": list_products(include_inactive=include_inactive)})
+
+
+@main_blueprint.get("/api/chefia/produtos")
+@role_required("chefe_sala")
+def floor_chief_products():
     include_inactive = request.args.get("include_inactive", "true").lower() in {
         "1",
         "true",

@@ -184,9 +184,14 @@
         {% endif %}
 
         <nav class="collaborator-nav" aria-label="Navegacao de colaboradores">
+            {% if not show_admin_nav %}
             <a href="{{ sales_url }}">Painel de vendas</a>
+            {% endif %}
             <a href="{{ productivity_url }}" class="{% if active_collaborator_tab == 'produtividade' %}active{% endif %}">Produtividade</a>
             <a href="{{ management_url }}" class="{% if active_collaborator_tab == 'gerenciamento' %}active{% endif %}">Gerenciamento</a>
+            {% if not show_admin_nav %}
+            <a href="/chefia/estoque">Estoque</a>
+            {% endif %}
         </nav>
 
         {% if show_management %}

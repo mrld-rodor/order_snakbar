@@ -335,14 +335,23 @@
             <div>
                 <p>{{ app_name }}</p>
                 <h1>{{ page_title }}</h1>
-                <p class="muted">Gestao completa do catalogo com imagens e preservacao do historico de vendas.</p>
+                <p class="muted">{{ page_description or 'Gestao completa do catalogo com imagens e preservacao do historico de vendas.' }}</p>
             </div>
             <div class="topbar-actions">
                 <button id="logout-button" type="button">Sair</button>
             </div>
         </div>
 
+        {% if show_admin_nav %}
         {% include 'admin_nav.html' %}
+        {% else %}
+        <nav class="admin-nav">
+            <a href="{{ sales_url }}" class="{% if active_chief_tab == 'vendas' %}active{% endif %}">Painel de vendas</a>
+            <a href="{{ productivity_url }}" class="{% if active_chief_tab == 'produtividade' %}active{% endif %}">Produtividade</a>
+            <a href="{{ management_url }}" class="{% if active_chief_tab == 'gerenciamento' %}active{% endif %}">Gerenciamento</a>
+            <a href="{{ stock_url }}" class="{% if active_chief_tab == 'estoque' %}active{% endif %}">Estoque</a>
+        </nav>
+        {% endif %}
 
         <section class="card">
             <div class="metrics" id="overview-metrics"></div>
@@ -352,14 +361,18 @@
             <section class="card">
                 <div class="toolbar">
                     <div>
-                        <h2 class="section-title">Produto</h2>
-                        <p class="muted">Crie ou edite comidas e bebidas com imagem.</p>
+                        <h2 class="section-title">{% if read_only %}Consulta do produto{% else %}Produto{% endif %}</h2>
+                        <p class="muted">{% if read_only %}Consulte detalhes do item, disponibilidade e niveis de estoque sem alterar o catalogo.{% else %}Crie ou edite comidas e bebidas com imagem.{% endif %}</p>
                     </div>
+                    {% if not read_only %}
                     <button id="new-product-button" type="button" class="secondary">Novo produto</button>
+                    {% endif %}
                 </div>
 
                 <form id="product-form" class="form-grid" enctype="multipart/form-data">
                     <input id="product-id" name="product_id" type="hidden">
+
+                    <fieldset style="border:0; padding:0; margin:0; display:grid; gap:0.9rem;" {% if read_only %}disabled{% endif %}>
 
                     <label>
                         Nome do produto
@@ -417,12 +430,16 @@
                         <input id="remove_image" name="remove_image" type="checkbox">
                     </label>
 
+                    </fieldset>
+
                     <div class="image-preview" id="image-preview">Sem imagem selecionada</div>
 
+                    {% if not read_only %}
                     <div class="product-actions">
                         <button type="submit" id="submit-button">Guardar produto</button>
                         <button type="button" id="cancel-edit-button" class="secondary">Cancelar</button>
                     </div>
+                    {% endif %}
                 </form>
 
                 <div id="form-message" class="message"></div>
@@ -432,7 +449,7 @@
                 <div class="toolbar">
                     <div>
                         <h2 class="section-title">Catalogo de produtos</h2>
-                        <p class="muted">Introduzir, editar e apagar produtos do menu com rastreio de estado.</p>
+                        <p class="muted">{% if read_only %}Consulta completa de produtos, disponibilidade e alertas de estoque.{% else %}Introduzir, editar e apagar produtos do menu com rastreio de estado.{% endif %}</p>
                     </div>
                     <label>
                         Mostrar inativos
@@ -448,6 +465,10 @@
 
     <script>
         const token = localStorage.getItem('access_token');
+        const readOnly = {{ 'true' if read_only else 'false' }};
+        const overviewEndpoint = {{ (overview_endpoint or '/api/admin/area')|tojson }};
+        const categoriesEndpoint = {{ (categories_endpoint or '/api/admin/categories')|tojson }};
+        const productsEndpoint = {{ (products_endpoint or '/api/admin/products')|tojson }};
         const state = {
             categories: [],
             products: [],
@@ -477,13 +498,15 @@
             window.location.href = '/login';
         });
 
-        document.getElementById('new-product-button').addEventListener('click', () => {
-            resetForm();
-        });
+        if (!readOnly) {
+            document.getElementById('new-product-button').addEventListener('click', () => {
+                resetForm();
+            });
 
-        document.getElementById('cancel-edit-button').addEventListener('click', () => {
-            resetForm();
-        });
+            document.getElementById('cancel-edit-button').addEventListener('click', () => {
+                resetForm();
+            });
+        }
 
         document.getElementById('include-inactive').addEventListener('change', () => {
             loadProducts();
@@ -674,8 +697,12 @@
                         <div>Estoque: ${product.stock_quantity} unidades</div>
                         <div>Alerta minimo: ${product.low_stock_threshold}</div>
                         <div class="product-actions">
+                            ${readOnly
+                                ? `<button type="button" data-action="view" data-id="${product.id}" class="secondary">Consultar</button>`
+                                : `
                             <button type="button" data-action="edit" data-id="${product.id}" class="secondary">Editar</button>
                             <button type="button" data-action="delete" data-id="${product.id}" class="danger">Apagar</button>
+                                `}
                         </div>
                     </div>
                 `;
@@ -697,7 +724,7 @@
             removeImageWrapper.classList.add('hidden');
             removeImageInput.checked = false;
             renderPreview(null);
-            setMessage(formMessage, '');
+            setMessage(formMessage, readOnly ? 'Selecione um produto para consultar os detalhes.' : '');
             if (state.categories.length) {
                 categorySelect.value = state.categories[0].id;
             }
@@ -719,18 +746,18 @@
             removeImageWrapper.classList.toggle('hidden', !product.image_url);
             removeImageInput.checked = false;
             renderPreview(product.image_url || null);
-            setMessage(formMessage, `Editando ${product.name}.`, 'success');
+            setMessage(formMessage, readOnly ? `Consulta aberta para ${product.name}.` : `Editando ${product.name}.`, 'success');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         async function loadAdminOverview() {
-            const response = await authorizedFetch('/api/admin/area');
+            const response = await authorizedFetch(overviewEndpoint);
             const data = await response.json();
             renderOverview(data);
         }
 
         async function loadCategories() {
-            const response = await authorizedFetch('/api/admin/categories');
+            const response = await authorizedFetch(categoriesEndpoint);
             const data = await response.json();
             state.categories = data.categories;
             renderCategories();
@@ -738,7 +765,7 @@
 
         async function loadProducts() {
             const includeInactive = document.getElementById('include-inactive').checked;
-            const response = await authorizedFetch(`/api/admin/products?include_inactive=${includeInactive}`);
+            const response = await authorizedFetch(`${productsEndpoint}?include_inactive=${includeInactive}`);
             const data = await response.json();
             state.products = data.products;
             renderProducts();
@@ -821,6 +848,11 @@
                 return;
             }
 
+            if (button.dataset.action === 'view') {
+                fillForm(product);
+                return;
+            }
+
             if (button.dataset.action === 'edit') {
                 fillForm(product);
                 return;
@@ -839,7 +871,9 @@
             resetForm();
         }
 
-        form.addEventListener('submit', submitProduct);
+        if (!readOnly) {
+            form.addEventListener('submit', submitProduct);
+        }
 
         initializePage();
     </script>
