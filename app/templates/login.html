@@ -106,11 +106,11 @@
     <section class="card">
         <p>Sistema de autenticacao inicial</p>
         <h1>Entrar no {{ app_name }}</h1>
-        <p>Administradores podem entrar com email e senha. Colaboradores e chefia podem usar email e senha ou codigo de acesso com PIN de 4 digitos.</p>
+        <p>Administradores, chefia e colaboradores podem entrar com contacto e senha, ou com o numero do colaborador de 5 caracteres e PIN de 4 digitos.</p>
 
         <form id="login-form">
             <label>
-                Email ou codigo
+                Contacto ou codigo
                 <input id="identifier" name="identifier" type="text" autocomplete="username" required>
             </label>
 
@@ -160,12 +160,12 @@
             message.classList.add('success');
 
             if (data.user.role === 'administrador') {
-                window.location.href = '/admin';
+                window.location.href = '/admin/colaboradores/gerenciamento';
                 return;
             }
 
             if (data.user.role === 'chefe_sala') {
-                window.location.href = '/chefia/vendas';
+                window.location.href = '/chefia/colaboradores';
                 return;
             }
 

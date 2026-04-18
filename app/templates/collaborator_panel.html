@@ -14,6 +14,10 @@
             --accent-dark: #78401f;
             --accent-soft: #eadccf;
             --border: #decbbc;
+            --food: #b85c38;
+            --food-dark: #8f4021;
+            --drink: #356a62;
+            --drink-dark: #214a44;
             --danger: #a1362b;
             --success: #2a6a3f;
         }
@@ -101,28 +105,182 @@
         }
 
         .layout {
-            grid-template-columns: 260px 1fr 360px;
+            grid-template-columns: 260px minmax(0, 1fr) 360px;
             align-items: start;
         }
 
-        .subgroups-card {
-            margin-top: 1rem;
+        .center-panel {
+            display: grid;
+            gap: 1rem;
+            overflow: hidden;
         }
 
-        .subgroups-row {
-            display: flex;
-            gap: 0.75rem;
-            overflow-x: auto;
-            padding-bottom: 0.25rem;
+        .search-panel {
+            padding: 0.1rem 0;
         }
 
-        .subgroups-row::-webkit-scrollbar {
-            height: 8px;
+        .group-panel {
+            display: grid;
+            gap: 1rem;
+            padding: 1.15rem;
+            border-radius: 22px;
+            border: 1px solid rgba(149, 85, 47, 0.12);
+            background:
+                radial-gradient(circle at top right, rgba(149, 85, 47, 0.08), transparent 28%),
+                linear-gradient(180deg, #fffaf6, #f6ece2);
         }
 
-        .subgroups-row::-webkit-scrollbar-thumb {
-            background: #d8c1ae;
+        .search-input {
+            width: 100%;
+            border: 1px solid var(--border);
             border-radius: 999px;
+            padding: 0.95rem 1.15rem;
+            font: inherit;
+            background: #fff;
+            color: var(--text);
+            box-shadow: inset 0 1px 2px rgba(44, 34, 27, 0.05);
+            transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(149, 85, 47, 0.42);
+            box-shadow: 0 0 0 4px rgba(149, 85, 47, 0.12);
+        }
+
+        .group-switcher {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem;
+        }
+
+        .group-switcher.subgroup-stage {
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        }
+
+        .stage-actions {
+            display: none;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        .stage-actions.visible {
+            display: grid;
+        }
+
+        .stage-action-button {
+            min-width: 0;
+            border: 1px solid rgba(44, 34, 27, 0.12);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.78);
+            color: var(--text);
+            font: inherit;
+            font-weight: 700;
+            padding: 0.8rem 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            text-align: center;
+            transition: background 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease, opacity 0.16s ease;
+        }
+
+        .stage-action-button:hover {
+            transform: translateY(-1px);
+            background: #fff;
+            box-shadow: 0 10px 18px rgba(58, 34, 24, 0.08);
+        }
+
+        .stage-action-button:disabled {
+            opacity: 0.46;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .stage-action-icon {
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            flex: 0 0 auto;
+        }
+
+        .stage-action-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .group-button {
+            min-height: 120px;
+            padding: 1.1rem 1.2rem;
+            border-radius: 24px;
+            border: 1px solid rgba(44, 34, 27, 0.08);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 238, 231, 0.98));
+            color: var(--text);
+            font: inherit;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: left;
+            box-shadow: 0 16px 30px rgba(67, 42, 28, 0.08);
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+            overflow: hidden;
+        }
+
+        .group-button span {
+            display: block;
+            margin-top: 0.45rem;
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            line-height: 1.35;
+        }
+
+        .group-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 34px rgba(67, 42, 28, 0.12);
+        }
+
+        .group-button:focus-visible,
+        .category-button:focus-visible,
+        .table-button:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(149, 85, 47, 0.14);
+        }
+
+        .group-button.group-comidas {
+            background: linear-gradient(180deg, rgba(255, 245, 239, 0.98), rgba(247, 228, 216, 0.98));
+            border-color: rgba(184, 92, 56, 0.18);
+        }
+
+        .group-button.group-bebidas {
+            background: linear-gradient(180deg, rgba(241, 249, 247, 0.98), rgba(224, 239, 235, 0.98));
+            border-color: rgba(53, 106, 98, 0.18);
+        }
+
+        .group-button.active {
+            transform: translateY(-1px);
+            color: white;
+            border-color: transparent;
+        }
+
+        .group-button.group-comidas.active {
+            background: linear-gradient(135deg, var(--food), var(--food-dark));
+            box-shadow: 0 22px 36px rgba(143, 64, 33, 0.24);
+        }
+
+        .group-button.group-bebidas.active {
+            background: linear-gradient(135deg, var(--drink), var(--drink-dark));
+            box-shadow: 0 22px 36px rgba(33, 74, 68, 0.24);
+        }
+
+        .group-button.active span {
+            color: rgba(255, 255, 255, 0.82);
         }
 
         .tables-grid {
@@ -177,6 +335,13 @@
             font: inherit;
             color: var(--text);
             text-align: left;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+        }
+
+        .category-button:hover,
+        .table-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 22px rgba(58, 34, 24, 0.08);
         }
 
         .table-button.open {
@@ -199,8 +364,14 @@
         }
 
         .category-button {
-            min-width: 180px;
-            white-space: nowrap;
+            min-width: 0;
+            width: 100%;
+            white-space: normal;
+        }
+
+        .category-button.empty-subgroup {
+            background: #f8f1ea;
+            color: #7d6858;
         }
 
         .table-button small, .category-button small {
@@ -254,6 +425,13 @@
             align-items: center;
             gap: 0.6rem;
             margin-top: 0.3rem;
+        }
+
+        .panel-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: flex-start;
         }
 
         .qty-input {
@@ -700,6 +878,48 @@
             flex-wrap: wrap;
         }
 
+        .auth-modal-form {
+            display: grid;
+            gap: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .auth-modal-label {
+            display: grid;
+            gap: 0.4rem;
+            font-weight: 700;
+        }
+
+        .auth-modal-input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 0.9rem 1rem;
+            font: inherit;
+            background: #fff;
+            color: var(--text);
+        }
+
+        .auth-modal-input:focus {
+            outline: none;
+            border-color: rgba(149, 85, 47, 0.42);
+            box-shadow: 0 0 0 4px rgba(149, 85, 47, 0.12);
+        }
+
+        .auth-modal-message {
+            min-height: 1.4rem;
+            margin-top: 0.25rem;
+            font-weight: 700;
+        }
+
+        .auth-modal-message.error {
+            color: var(--danger);
+        }
+
+        .auth-modal-message.success {
+            color: var(--success);
+        }
+
         .empty {
             border: 1px dashed var(--border);
             border-radius: 18px;
@@ -721,6 +941,8 @@
         }
 
         @media (max-width: 620px) {
+            .stage-actions,
+            .group-switcher,
             .ticket-overview-grid,
             .terminal-row {
                 grid-template-columns: minmax(0, 1fr);
@@ -750,22 +972,18 @@
             <div>
                 <p>{{ app_name }}</p>
                 <h1>{{ page_title }}</h1>
-                <p class="muted">{{ page_description or 'Tela central da operacao: escolha a mesa, valide a credencial do responsavel, continue a venda ou lance novos pedidos em tempo real.' }}</p>
             </div>
             <div class="topbar-actions">
-                <button id="logout-button" type="button" class="primary">Sair</button>
+                <button id="logout-button" type="button" class="primary">Voltar</button>
             </div>
         </div>
 
         <nav id="operations-nav" class="operations-nav" aria-label="Navegacao da operacao"></nav>
 
         <section class="card">
-            <div id="metrics" class="metrics"></div>
-        </section>
-
-        <section class="card subgroups-card">
-            <h2 class="section-title">Subgrupos</h2>
-            <div id="category-list" class="subgroups-row"></div>
+            <div class="search-panel">
+                <input id="product-search-input" class="search-input" type="search" placeholder="Pesquisar produto por nome..." autocomplete="off">
+            </div>
         </section>
 
         <div class="layout" style="margin-top: 1rem;">
@@ -774,11 +992,17 @@
                 <div id="tables-grid" class="tables-grid"></div>
             </section>
 
-            <section class="card">
-                <div style="display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1rem;">
+            <section class="card center-panel">
+                <div class="group-panel">
+                    <h2 class="section-title" style="margin-bottom:0;">Painel principal de vendas</h2>
+                    <div id="stage-actions" class="stage-actions"></div>
+                    <div id="main-group-list" class="group-switcher"></div>
+                </div>
+
+                <div class="panel-head">
                     <div>
                         <h2 class="section-title" style="margin-bottom:0.25rem;">Produtos</h2>
-                        <div id="products-caption" class="muted">Selecione uma categoria e uma mesa para comecar.</div>
+                        <div id="products-caption" class="muted">Selecione um grupo, um subgrupo e uma mesa para comecar.</div>
                     </div>
                 </div>
                 <div id="table-warning-banner" class="warning-banner"></div>
@@ -834,37 +1058,132 @@
             </div>
         </div>
 
+        <div id="sales-auth-modal" class="modal-overlay" aria-hidden="true">
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="sales-auth-title">
+                <div class="label">Autenticacao da mesa</div>
+                <h2 id="sales-auth-title" class="section-title">Entrar para abrir a mesa</h2>
+                <div id="sales-auth-caption" class="muted">Informe o numero do colaborador gerado automaticamente e o PIN para continuar a venda.</div>
+                <form id="sales-auth-form" class="auth-modal-form">
+                    <label class="auth-modal-label" for="sales-auth-identifier">
+                        Numero do colaborador
+                        <input id="sales-auth-identifier" class="auth-modal-input" type="text" autocomplete="username" required>
+                    </label>
+                    <label class="auth-modal-label" for="sales-auth-secret">
+                        PIN
+                        <input id="sales-auth-secret" class="auth-modal-input" type="password" autocomplete="current-password" required>
+                    </label>
+                    <div id="sales-auth-message" class="auth-modal-message"></div>
+                    <div class="modal-actions">
+                        <button id="cancel-sales-auth-button" class="secondary" type="button">Cancelar</button>
+                        <button id="submit-sales-auth-button" class="primary" type="submit">Entrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="return-confirmation-modal" class="modal-overlay" aria-hidden="true">
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="return-confirmation-title">
+                <div class="label">Confirmacao de retorno</div>
+                <h2 id="return-confirmation-title" class="section-title">Voltar para a tela inicial</h2>
+                <div class="muted">Ao continuar, voce voltara para a escolha entre Vendas e Gerenciamento. A autenticacao usada na selecao da mesa nao sera tratada como logout aqui.</div>
+                <div class="modal-actions" style="margin-top: 1rem;">
+                    <button id="cancel-return-button" class="secondary" type="button">Cancelar</button>
+                    <button id="confirm-return-button" class="primary" type="button">Voltar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="table-access-denied-modal" class="modal-overlay" aria-hidden="true">
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="table-access-denied-title">
+                <div class="label">Acesso negado</div>
+                <h2 id="table-access-denied-title" class="section-title">Mesa bloqueada</h2>
+                <div id="table-access-denied-message" class="muted">Esta mesa foi aberta por outro colaborador e nao pode ser alterada por este acesso.</div>
+                <div class="modal-actions" style="margin-top: 1rem;">
+                    <button id="acknowledge-access-denied-button" class="primary" type="button">OK</button>
+                </div>
+            </div>
+        </div>
+
         <div id="toast-stack" class="toast-stack"></div>
     </div>
 
     <script>
-        const token = localStorage.getItem('access_token');
-        if (!token) {
-            window.location.href = '/login';
+        function currentAccessToken() {
+            return state.salesAccessToken;
+        }
+
+        function hasSalesSession() {
+            return Boolean(currentAccessToken() && state.authorizedTableId);
+        }
+
+        function hasAuthorizationForTable(tableId = state.selectedTableId) {
+            return Boolean(currentAccessToken() && tableId && state.authorizedTableId === tableId);
         }
 
         const state = {
+            salesAccessToken: null,
+            authorizedTableId: null,
             user: null,
             categories: [],
             tables: [],
-            selectedCategoryId: null,
+            selectedMainGroupKey: null,
+            selectedSubgroupKey: null,
+            selectedChildKey: null,
             selectedTableId: null,
+            productSearchTerm: '',
             currentTicket: null,
             pendingAdd: null,
+            pendingAuthTableId: null,
+            pendingAuthTableNumber: null,
             floorChief: null,
             refreshInFlight: false,
             tablesSignature: '',
         };
 
-        const metrics = document.getElementById('metrics');
+        const MENU_GROUPS = [
+            {
+                key: 'comidas',
+                label: 'Comidas',
+                description: 'Entradas, principais e sobremesas.',
+                subgroups: [
+                    {
+                        key: 'entradas',
+                        label: 'Entradas',
+                        categorySlugs: [],
+                        children: [
+                            { key: 'cover-completo', label: 'Cover completo', categorySlugs: [] },
+                            { key: 'camarao', label: 'Camarao', categorySlugs: [] },
+                        ],
+                    },
+                    { key: 'principal', label: 'Principal', categorySlugs: ['comidas'] },
+                    { key: 'sobremesas', label: 'Sobremesas', categorySlugs: ['sobremesas'] },
+                ],
+            },
+            {
+                key: 'bebidas',
+                label: 'Bebidas',
+                description: 'Selecao rapida por tipo de bebida.',
+                subgroups: [
+                    { key: 'softdrinks', label: 'Softdrinks', categorySlugs: [] },
+                    { key: 'nao-alcoolicas', label: 'Nao alcoolicas', categorySlugs: ['cafes', 'sumos-naturais', 'iced-tea'] },
+                    { key: 'aperitivos', label: 'Aperitivos', categorySlugs: [] },
+                    { key: 'vinhos', label: 'Vinhos', categorySlugs: [] },
+                    { key: 'cervejas', label: 'Cervejas', categorySlugs: [] },
+                ],
+            },
+        ];
+
         const operationsNav = document.getElementById('operations-nav');
-        const categoryList = document.getElementById('category-list');
+        const logoutButton = document.getElementById('logout-button');
+        const stageActions = document.getElementById('stage-actions');
+        const mainGroupList = document.getElementById('main-group-list');
         const tablesGrid = document.getElementById('tables-grid');
         const productsGrid = document.getElementById('products-grid');
         const ticketLines = document.getElementById('ticket-lines');
         const actionMessage = document.getElementById('action-message');
         const selectedTableLabel = document.getElementById('selected-table-label');
         const productsCaption = document.getElementById('products-caption');
+        const productSearchInput = document.getElementById('product-search-input');
         const discountInput = document.getElementById('discount-input');
         const ticketCalculatorDisplay = document.getElementById('ticket-calculator-display');
         const ownerCredentialsCard = document.getElementById('owner-credentials-card');
@@ -876,6 +1195,19 @@
         const addConfirmationDetails = document.getElementById('add-confirmation-details');
         const confirmAddButton = document.getElementById('confirm-add-button');
         const cancelAddButton = document.getElementById('cancel-add-button');
+        const salesAuthModal = document.getElementById('sales-auth-modal');
+        const salesAuthForm = document.getElementById('sales-auth-form');
+        const salesAuthCaption = document.getElementById('sales-auth-caption');
+        const salesAuthIdentifier = document.getElementById('sales-auth-identifier');
+        const salesAuthSecret = document.getElementById('sales-auth-secret');
+        const salesAuthMessage = document.getElementById('sales-auth-message');
+        const cancelSalesAuthButton = document.getElementById('cancel-sales-auth-button');
+        const returnConfirmationModal = document.getElementById('return-confirmation-modal');
+        const cancelReturnButton = document.getElementById('cancel-return-button');
+        const confirmReturnButton = document.getElementById('confirm-return-button');
+        const tableAccessDeniedModal = document.getElementById('table-access-denied-modal');
+        const tableAccessDeniedMessage = document.getElementById('table-access-denied-message');
+        const acknowledgeAccessDeniedButton = document.getElementById('acknowledge-access-denied-button');
         const toastStack = document.getElementById('toast-stack');
 
         function setMessage(text, type = '', showToast = true) {
@@ -900,37 +1232,12 @@
         }
 
         function renderOperationsNav() {
-            const role = state.user?.role;
-            const currentPath = window.location.pathname;
-            const links = [];
-
-            if (role === 'administrador') {
-                links.push(
-                    { href: '/operacao', label: 'Painel de vendas' },
-                    { href: '/admin/produtos', label: 'Produtos e vendas' },
-                    { href: '/admin/colaboradores', label: 'Colaboradores' },
-                    { href: '/admin/catalogo', label: 'Catalogo e CRUD' },
-                );
-            } else if (role === 'chefe_sala') {
-                links.push(
-                    { href: '/chefia/vendas', label: 'Painel de vendas' },
-                    { href: '/chefia', label: 'Produtividade' },
-                    { href: '/chefia/colaboradores', label: 'Gerenciamento' },
-                    { href: '/chefia/estoque', label: 'Estoque' },
-                );
-            }
-
             operationsNav.innerHTML = '';
-            operationsNav.classList.toggle('visible', links.length > 0);
+            operationsNav.classList.remove('visible');
+        }
 
-            links.forEach((link) => {
-                const anchor = document.createElement('a');
-                anchor.href = link.href;
-                const isActive = currentPath === link.href;
-                anchor.className = `operations-nav-link${isActive ? ' active' : ''}`;
-                anchor.textContent = link.label;
-                operationsNav.appendChild(anchor);
-            });
+        function syncSessionChrome() {
+            logoutButton.textContent = 'Voltar';
         }
 
         function setTableWarning(text = '') {
@@ -943,6 +1250,217 @@
                 style: 'currency',
                 currency: 'EUR',
             }).format(value || 0);
+        }
+
+        function normalizeText(value) {
+            return String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .trim();
+        }
+
+        function currentMainGroup() {
+            return MENU_GROUPS.find((group) => group.key === state.selectedMainGroupKey) || null;
+        }
+
+        function currentSubgroup() {
+            const group = currentMainGroup();
+            if (!group) {
+                return null;
+            }
+            return group.subgroups.find((subgroup) => subgroup.key === state.selectedSubgroupKey) || null;
+        }
+
+        function currentChildOption() {
+            const subgroup = currentSubgroup();
+            if (!subgroup || !subgroup.children?.length) {
+                return null;
+            }
+            return subgroup.children.find((child) => child.key === state.selectedChildKey) || null;
+        }
+
+        function currentCatalogSelection() {
+            return currentChildOption() || currentSubgroup();
+        }
+
+        function isChildStageActive() {
+            return Boolean(currentSubgroup()?.children?.length);
+        }
+
+        function alternateMainGroup() {
+            const activeGroup = currentMainGroup();
+            if (!activeGroup) {
+                return null;
+            }
+            return MENU_GROUPS.find((group) => group.key !== activeGroup.key) || null;
+        }
+
+        function iconMarkup(type) {
+            const icons = {
+                home: '<span class="stage-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5.5 9.5V21h13V9.5"></path></svg></span>',
+                drink: '<span class="stage-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4h10l-1 7a4 4 0 0 1-4 3 4 4 0 0 1-4-3L7 4Z"></path><path d="M12 14v6"></path><path d="M9 20h6"></path></svg></span>',
+                food: '<span class="stage-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4v7"></path><path d="M7 4v7"></path><path d="M4 8h3"></path><path d="M10 4v17"></path><path d="M16 4c1.7 2 2.5 4.1 2.5 6.5S17.7 15 16 17"></path><path d="M16 4v17"></path></svg></span>',
+                back: '<span class="stage-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 6 4 12l6 6"></path><path d="M4 12h13a3 3 0 0 1 3 3v3"></path></svg></span>',
+                level: '<span class="stage-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h16"></path><path d="M4 12h10"></path><path d="M4 17h6"></path></svg></span>',
+            };
+            return icons[type] || '';
+        }
+
+        function createStageActionButton(config) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'stage-action-button';
+            button.innerHTML = `${iconMarkup(config.icon)}<span>${config.label}</span>`;
+            button.disabled = Boolean(config.disabled);
+            if (!config.disabled && config.onClick) {
+                button.addEventListener('click', config.onClick);
+            }
+            return button;
+        }
+
+        function renderStageActions() {
+            stageActions.innerHTML = '';
+            const activeGroup = currentMainGroup();
+            if (!activeGroup) {
+                stageActions.classList.remove('visible');
+                return;
+            }
+
+            stageActions.classList.add('visible');
+            const siblingGroup = alternateMainGroup();
+            const isChildStage = isChildStageActive();
+            const isAtGroupRoot = !state.selectedSubgroupKey;
+
+            const actions = [
+                {
+                    icon: 'home',
+                    label: 'Home',
+                    disabled: false,
+                    onClick: () => {
+                        state.selectedMainGroupKey = null;
+                        state.selectedSubgroupKey = null;
+                        state.selectedChildKey = null;
+                        renderStageActions();
+                        renderMainGroups();
+                        renderProducts();
+                    },
+                },
+                {
+                    icon: activeGroup.key === 'comidas' ? 'drink' : 'food',
+                    label: siblingGroup?.label || 'Grupo',
+                    disabled: !siblingGroup,
+                    onClick: () => {
+                        if (!siblingGroup) {
+                            return;
+                        }
+                        state.selectedMainGroupKey = siblingGroup.key;
+                        state.selectedSubgroupKey = null;
+                        state.selectedChildKey = null;
+                        renderStageActions();
+                        renderMainGroups();
+                        renderProducts();
+                    },
+                },
+                {
+                    icon: 'back',
+                    label: 'Voltar',
+                    disabled: isAtGroupRoot,
+                    onClick: () => {
+                        if (isChildStage) {
+                            state.selectedSubgroupKey = null;
+                            state.selectedChildKey = null;
+                        } else {
+                            state.selectedMainGroupKey = null;
+                            state.selectedSubgroupKey = null;
+                            state.selectedChildKey = null;
+                        }
+                        renderStageActions();
+                        renderMainGroups();
+                        renderProducts();
+                    },
+                },
+                {
+                    icon: 'level',
+                    label: 'Raiz',
+                    disabled: !isChildStage,
+                    onClick: () => {
+                        state.selectedSubgroupKey = null;
+                        state.selectedChildKey = null;
+                        renderStageActions();
+                        renderMainGroups();
+                        renderProducts();
+                    },
+                },
+            ];
+
+            actions.forEach((action) => {
+                stageActions.appendChild(createStageActionButton(action));
+            });
+        }
+
+        function productsForSelection(selection) {
+            if (!selection) {
+                return [];
+            }
+
+            const slugSet = new Set(selection.categorySlugs || []);
+            return state.categories
+                .filter((category) => slugSet.has(category.slug))
+                .flatMap((category) =>
+                    (category.products || []).map((product) => ({
+                        ...product,
+                        category_name: category.name,
+                    }))
+                );
+        }
+
+        function visibleProductsForCurrentSelection() {
+            const baseProducts = productsForSelection(currentCatalogSelection());
+            const query = normalizeText(state.productSearchTerm);
+
+            if (!query) {
+                return baseProducts;
+            }
+
+            return baseProducts.filter((product) => {
+                const haystack = normalizeText(`${product.name} ${product.description} ${product.category_name || ''}`);
+                return haystack.includes(query);
+            });
+        }
+
+        function syncGroupSelection() {
+            if (!state.selectedMainGroupKey) {
+                state.selectedSubgroupKey = null;
+                state.selectedChildKey = null;
+                return;
+            }
+
+            const group = currentMainGroup();
+            if (!group) {
+                state.selectedMainGroupKey = null;
+                state.selectedSubgroupKey = null;
+                state.selectedChildKey = null;
+                return;
+            }
+
+            const hasSelectedSubgroup = group.subgroups.some((subgroup) => subgroup.key === state.selectedSubgroupKey);
+            if (!hasSelectedSubgroup) {
+                state.selectedSubgroupKey = null;
+                state.selectedChildKey = null;
+                return;
+            }
+
+            const subgroup = currentSubgroup();
+            if (!subgroup?.children?.length) {
+                state.selectedChildKey = null;
+                return;
+            }
+
+            const hasSelectedChild = subgroup.children.some((child) => child.key === state.selectedChildKey);
+            if (!hasSelectedChild) {
+                state.selectedChildKey = null;
+            }
         }
 
         function selectedTable() {
@@ -1004,7 +1522,7 @@
                 quantity: parsedQuantity,
                 unitPrice: product.price,
                 tableNumber: table.number,
-                categoryName: currentCategory()?.name || '-',
+                categoryName: currentCatalogSelection()?.label || product.category || '-',
             };
 
             addConfirmationMessage.textContent = `Mesa ${table.number}: confirme o produto e a quantidade antes de lancar na conta.`;
@@ -1025,7 +1543,7 @@
                 </div>
                 <div class="chips">
                     <span class="chip">Mesa ${state.pendingAdd.tableNumber}</span>
-                    <span class="chip">Categoria ${state.pendingAdd.categoryName}</span>
+                    <span class="chip">Subgrupo ${state.pendingAdd.categoryName}</span>
                 </div>
             `;
 
@@ -1034,10 +1552,13 @@
         }
 
         async function authorizedFetch(url, options = {}) {
+            const authToken = currentAccessToken();
             const headers = {
-                Authorization: `Bearer ${token}`,
                 ...(options.headers || {}),
             };
+            if (authToken) {
+                headers.Authorization = `Bearer ${authToken}`;
+            }
             if (options.body) {
                 headers['Content-Type'] = 'application/json';
             }
@@ -1048,32 +1569,137 @@
             });
 
             if (response.status === 401 || response.status === 422) {
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('auth_user');
-                window.location.href = '/login';
+                state.salesAccessToken = null;
+                state.authorizedTableId = null;
+                state.user = null;
+                state.currentTicket = null;
+                state.selectedTableId = null;
+                syncSessionChrome();
+                renderMetrics();
+                renderTables();
+                renderTicket(null);
+                renderProducts();
                 throw new Error('Sessao expirada');
             }
 
             return response;
         }
 
-        function renderMetrics() {
-            metrics.innerHTML = '';
-            const occupiedTables = state.tables.filter((table) => table.has_open_ticket).length;
-            const cards = [
-                { label: 'Operador logado', value: state.user?.name || 'Carregando...' },
-                { label: 'Mesas ativas', value: state.tables.length },
-                { label: 'Mesas com ticket aberto', value: occupiedTables },
-                { label: 'Categorias disponiveis', value: state.categories.length },
-            ];
+        function clearSalesAuthMessage() {
+            salesAuthMessage.textContent = '';
+            salesAuthMessage.className = 'auth-modal-message';
+        }
 
-            cards.forEach((item) => {
-                const card = document.createElement('div');
-                card.className = 'metric';
-                card.innerHTML = `<div class="label">${item.label}</div><div class="value">${item.value}</div>`;
-                metrics.appendChild(card);
+        function openSalesAuthModal(table) {
+            state.pendingAuthTableId = table?.id || null;
+            state.pendingAuthTableNumber = table?.number || null;
+            salesAuthCaption.textContent = table
+                ? `Mesa ${table.number}: informe o numero do colaborador gerado automaticamente e o PIN para continuar.`
+                : 'Informe o numero do colaborador gerado automaticamente e o PIN para continuar a venda.';
+            clearSalesAuthMessage();
+            salesAuthSecret.value = '';
+            salesAuthModal.classList.add('visible');
+            salesAuthModal.setAttribute('aria-hidden', 'false');
+            window.setTimeout(() => {
+                salesAuthIdentifier.focus();
+            }, 0);
+        }
+
+        function closeSalesAuthModal() {
+            state.pendingAuthTableId = null;
+            state.pendingAuthTableNumber = null;
+            clearSalesAuthMessage();
+            salesAuthModal.classList.remove('visible');
+            salesAuthModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function openTableAccessDeniedModal(message) {
+            tableAccessDeniedMessage.textContent = message;
+            tableAccessDeniedModal.classList.add('visible');
+            tableAccessDeniedModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeTableAccessDeniedModal() {
+            tableAccessDeniedModal.classList.remove('visible');
+            tableAccessDeniedModal.setAttribute('aria-hidden', 'true');
+        }
+
+        function openReturnConfirmationModal() {
+            returnConfirmationModal.classList.add('visible');
+            returnConfirmationModal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeReturnConfirmationModal() {
+            returnConfirmationModal.classList.remove('visible');
+            returnConfirmationModal.setAttribute('aria-hidden', 'true');
+        }
+
+        async function activateTableAfterAuthentication(tableId) {
+            if (!tableId) {
+                return;
+            }
+            const table = state.tables.find((entry) => entry.id === tableId);
+            if (!table) {
+                return;
+            }
+            state.selectedTableId = table.id;
+            renderTables();
+            await loadTicket(table.id);
+            renderProducts();
+        }
+
+        async function authenticateSalesSession(event) {
+            event.preventDefault();
+            clearSalesAuthMessage();
+
+            const payload = {
+                identifier: salesAuthIdentifier.value,
+                secret: salesAuthSecret.value,
+            };
+
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
             });
+            const data = await response.json();
 
+            if (!response.ok) {
+                salesAuthMessage.textContent = data.message || 'Falha ao autenticar colaborador.';
+                salesAuthMessage.classList.add('error');
+                return;
+            }
+
+            if (!['colaborador', 'administrador', 'chefe_sala'].includes(data.user.role)) {
+                salesAuthMessage.textContent = 'Perfil sem permissao para o painel de vendas.';
+                salesAuthMessage.classList.add('error');
+                return;
+            }
+
+            state.salesAccessToken = data.access_token;
+            state.authorizedTableId = state.pendingAuthTableId;
+            state.user = data.user;
+            syncSessionChrome();
+            salesAuthMessage.textContent = 'Acesso liberado para a mesa.';
+            salesAuthMessage.classList.add('success');
+
+            const tableId = state.pendingAuthTableId;
+            closeSalesAuthModal();
+            await refreshTables({ silent: true });
+            await activateTableAfterAuthentication(tableId);
+        }
+
+        function requireSalesSession(tableId = state.selectedTableId) {
+            if (hasAuthorizationForTable(tableId)) {
+                return true;
+            }
+            const table = state.tables.find((entry) => entry.id === tableId) || null;
+            openSalesAuthModal(table);
+            return false;
+        }
+
+        function renderMetrics() {
+            syncSessionChrome();
             renderOperationsNav();
         }
 
@@ -1158,19 +1784,64 @@
             closeTicketButton.disabled = !hasTicket || !canClose;
         }
 
-        function renderCategories() {
-            categoryList.innerHTML = '';
-            state.categories.forEach((category) => {
+        function renderMainGroups() {
+            renderStageActions();
+            mainGroupList.innerHTML = '';
+            const activeGroup = currentMainGroup();
+            const activeSubgroup = currentSubgroup();
+
+            if (activeGroup && activeSubgroup?.children?.length) {
+                mainGroupList.classList.add('subgroup-stage');
+                activeSubgroup.children.forEach((child) => {
+                    const productCount = productsForSelection(child).length;
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = `category-button${state.selectedChildKey === child.key ? ' active' : ''}${productCount === 0 ? ' empty-subgroup' : ''}`;
+                    button.innerHTML = `${child.label}<small>${productCount > 0 ? `${productCount} produtos` : 'Em breve'}</small>`;
+                    button.addEventListener('click', () => {
+                        state.selectedChildKey = child.key;
+                        renderMainGroups();
+                        renderProducts();
+                    });
+                    mainGroupList.appendChild(button);
+                });
+                return;
+            }
+
+            if (activeGroup) {
+                mainGroupList.classList.add('subgroup-stage');
+                activeGroup.subgroups.forEach((subgroup) => {
+                    const button = document.createElement('button');
+                    const productCount = productsForSelection(subgroup).length;
+                    const isActive = state.selectedSubgroupKey === subgroup.key && !state.selectedChildKey;
+                    button.type = 'button';
+                    button.className = `category-button${isActive ? ' active' : ''}${productCount === 0 ? ' empty-subgroup' : ''}`;
+                    button.innerHTML = `${subgroup.label}<small>${subgroup.children?.length ? `${subgroup.children.length} opcoes` : productCount > 0 ? `${productCount} produtos` : 'Em breve'}</small>`;
+                    button.addEventListener('click', () => {
+                        state.selectedSubgroupKey = subgroup.key;
+                        state.selectedChildKey = null;
+                        renderMainGroups();
+                        renderProducts();
+                    });
+                    mainGroupList.appendChild(button);
+                });
+                return;
+            }
+
+            mainGroupList.classList.remove('subgroup-stage');
+            MENU_GROUPS.forEach((group) => {
                 const button = document.createElement('button');
                 button.type = 'button';
-                button.className = `category-button${state.selectedCategoryId === category.id ? ' active' : ''}`;
-                button.innerHTML = `${category.name}<small>${category.products.length} produtos</small>`;
+                button.className = `group-button group-${group.key}`;
+                button.innerHTML = `${group.label}<span>${group.description}</span>`;
                 button.addEventListener('click', () => {
-                    state.selectedCategoryId = category.id;
-                    renderCategories();
+                    state.selectedMainGroupKey = group.key;
+                    state.selectedSubgroupKey = null;
+                    state.selectedChildKey = null;
+                    renderMainGroups();
                     renderProducts();
                 });
-                categoryList.appendChild(button);
+                mainGroupList.appendChild(button);
             });
         }
 
@@ -1182,49 +1853,52 @@
                 button.className = `table-button${table.has_open_ticket ? ' open' : ''}${state.selectedTableId === table.id ? ' active' : ''}`;
                 button.innerHTML = `Mesa ${table.number}<small>${table.has_open_ticket ? 'Ticket aberto' : 'Sem ticket'}</small>`;
                 button.addEventListener('click', async () => {
-                    state.selectedTableId = table.id;
-                    renderTables();
-                    await loadTicket(table.id);
-                    renderProducts();
+                    openSalesAuthModal(table);
                 });
                 tablesGrid.appendChild(button);
             });
         }
 
-        function currentCategory() {
-            return state.categories.find((category) => category.id === state.selectedCategoryId) || null;
-        }
-
         function renderProducts() {
             productsGrid.innerHTML = '';
-            const category = currentCategory();
+            const group = currentMainGroup();
+            const subgroup = currentSubgroup();
+            const child = currentChildOption();
+            const selection = currentCatalogSelection();
+            const selectionProducts = productsForSelection(selection);
+            const products = visibleProductsForCurrentSelection();
             const ticket = state.currentTicket;
             const ownerName = ticket?.owner?.name || 'outro colaborador';
 
-            if (!category) {
+            if (!group || !selection) {
                 setTableWarning('');
-                productsGrid.innerHTML = '<div class="empty">Selecione um subgrupo do cardapio.</div>';
-                productsCaption.textContent = 'Selecione uma categoria e uma mesa para comecar.';
+                productsGrid.innerHTML = '<div class="empty">Clique em Comidas ou Bebidas para trocar este mesmo painel pelos subgrupos.</div>';
+                productsCaption.textContent = group ? `Escolha uma opcao dentro de ${group.label}.` : 'Escolha Comidas ou Bebidas para abrir os subgrupos no mesmo lugar.';
                 return;
             }
 
             if (!state.selectedTableId) {
                 setTableWarning('');
-                productsCaption.textContent = `Escolha uma mesa para adicionar itens de ${category.name}.`;
+                productsCaption.textContent = `Escolha uma mesa para adicionar itens de ${selection.label}.`;
             } else if (ticket && ticket.permissions?.can_manage === false) {
                 setTableWarning(`Mesa bloqueada para alteracoes: ${ownerName} iniciou esta venda. Apenas o responsavel, a chefia ou o administrador podem mexer nesta conta.`);
-                productsCaption.textContent = `Mesa ${selectedTable()?.number} esta apenas para consulta em ${category.name}.`;
+                productsCaption.textContent = `Mesa ${selectedTable()?.number} esta apenas para consulta em ${selection.label}.`;
             } else {
                 setTableWarning('');
-                productsCaption.textContent = `Mesa selecionada pronta para lancamento em ${category.name}.`;
+                productsCaption.textContent = `Mesa selecionada pronta para lancamento em ${group.label}${subgroup ? ` / ${subgroup.label}` : ''}${child ? ` / ${child.label}` : ''}.`;
             }
 
-            if (!category.products.length) {
-                productsGrid.innerHTML = '<div class="empty">Nao ha produtos ativos nesta categoria.</div>';
+            if (!selectionProducts.length) {
+                productsGrid.innerHTML = `<div class="empty">A opcao ${selection.label} ainda nao tem produtos cadastrados. Vamos implementar essa parte depois.</div>`;
                 return;
             }
 
-            category.products.forEach((product) => {
+            if (!products.length) {
+                productsGrid.innerHTML = `<div class="empty">Nenhum produto encontrado para a busca atual em ${selection.label}.</div>`;
+                return;
+            }
+
+            products.forEach((product) => {
                 const card = document.createElement('article');
                 card.className = 'product-card';
                 const disabled = !state.selectedTableId || product.stock_status === 'out_of_stock' || !canManageSelectedTicket();
@@ -1234,6 +1908,7 @@
                         <div class="chips">
                             <span class="chip">${currency(product.price)}</span>
                             <span class="chip">${product.stock_status}</span>
+                            <span class="chip">${product.category_name || product.category || subgroup.label}</span>
                             ${product.is_vegan ? '<span class="chip">Vegan</span>' : ''}
                         </div>
                         <strong>${product.name}</strong>
@@ -1311,8 +1986,24 @@
         }
 
         async function loadTicket(tableId) {
+            if (!hasAuthorizationForTable(tableId)) {
+                return;
+            }
             const response = await authorizedFetch(`/api/colaborador/tables/${tableId}/ticket`);
             const data = await response.json();
+
+            if (data.ticket && data.ticket.permissions?.can_manage === false && state.user?.role === 'colaborador') {
+                state.currentTicket = null;
+                state.selectedTableId = null;
+                state.salesAccessToken = null;
+                state.authorizedTableId = null;
+                renderTables();
+                renderTicket(null);
+                renderProducts();
+                openTableAccessDeniedModal(`Mesa ${data.ticket.table_number}: esta conta foi aberta por ${data.ticket.owner?.name || 'outro colaborador'} e nao pode ser alterada por voce.`);
+                return;
+            }
+
             state.currentTicket = data.ticket;
             if (data.selected_user) {
                 state.user = data.selected_user;
@@ -1326,6 +2017,9 @@
         async function addProductToTicket(productId, quantity) {
             if (!state.selectedTableId) {
                 setMessage('Selecione primeiro uma mesa.', 'error');
+                return;
+            }
+            if (!requireSalesSession(state.selectedTableId)) {
                 return;
             }
 
@@ -1363,6 +2057,9 @@
         async function updateTicketItem(itemId, quantity, successMessage = 'Item atualizado com sucesso.') {
             if (!state.selectedTableId) {
                 setMessage('Selecione primeiro uma mesa.', 'error');
+                return;
+            }
+            if (!requireSalesSession(state.selectedTableId)) {
                 return;
             }
 
@@ -1405,6 +2102,9 @@
                 setMessage('Selecione primeiro uma mesa.', 'error');
                 return;
             }
+            if (!requireSalesSession(state.selectedTableId)) {
+                return;
+            }
 
             const response = await authorizedFetch(
                 `/api/colaborador/tables/${state.selectedTableId}/ticket/items/${itemId}`,
@@ -1427,6 +2127,9 @@
         async function applyDiscount(amount) {
             if (!state.selectedTableId) {
                 setMessage('Selecione primeiro uma mesa.', 'error');
+                return;
+            }
+            if (!requireSalesSession(state.selectedTableId)) {
                 return;
             }
 
@@ -1456,9 +2159,14 @@
                 setMessage('Selecione primeiro uma mesa.', 'error');
                 return;
             }
+            if (!requireSalesSession(state.selectedTableId)) {
+                return;
+            }
+
+            const closingTableId = state.selectedTableId;
 
             const response = await authorizedFetch(
-                `/api/colaborador/tables/${state.selectedTableId}/ticket/close`,
+                `/api/colaborador/tables/${closingTableId}/ticket/close`,
                 {
                     method: 'PUT',
                     body: JSON.stringify({ payment_method: paymentMethodSelect.value }),
@@ -1473,7 +2181,11 @@
             }
 
             state.currentTicket = null;
+            state.selectedTableId = null;
             setMessage(data.message, 'success');
+            renderTables();
+            renderTicket(null);
+            renderProducts();
             await refreshTables();
         }
 
@@ -1486,26 +2198,24 @@
 
             state.refreshInFlight = true;
             try {
-                const bootstrapResponse = await authorizedFetch('/api/colaborador/ordering/bootstrap');
+                const bootstrapResponse = await fetch('/api/operacao/bootstrap-public');
                 const bootstrapData = await bootstrapResponse.json();
                 const previousTables = state.tables;
                 const previousSignature = state.tablesSignature;
                 const nextSignature = buildTablesSignature(bootstrapData.tables);
 
-                state.user = bootstrapData.user;
                 state.floorChief = bootstrapData.floor_chief || null;
                 state.categories = bootstrapData.categories;
                 state.tables = bootstrapData.tables;
                 state.tablesSignature = nextSignature;
-                if (!state.selectedCategoryId && state.categories.length) {
-                    state.selectedCategoryId = state.categories[0].id;
-                }
+                syncGroupSelection();
                 renderMetrics();
-                renderCategories();
+                renderStageActions();
+                renderMainGroups();
                 renderTables();
                 renderProducts();
 
-                if (state.selectedTableId) {
+                if (state.selectedTableId && hasAuthorizationForTable(state.selectedTableId)) {
                     const stillExists = state.tables.some((table) => table.id === state.selectedTableId);
                     if (stillExists) {
                         await loadTicket(state.selectedTableId);
@@ -1518,7 +2228,7 @@
                     renderTicket(null);
                 }
 
-                if (!state.selectedTableId) {
+                if (!state.selectedTableId || !hasAuthorizationForTable(state.selectedTableId)) {
                     renderOwnerCard(null);
                     syncActionState();
                 }
@@ -1542,25 +2252,58 @@
             }
         }
 
-        document.getElementById('logout-button').addEventListener('click', () => {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('auth_user');
-            window.location.href = '/login';
+        logoutButton.addEventListener('click', () => {
+            openReturnConfirmationModal();
         });
 
         document.getElementById('apply-discount-button').addEventListener('click', () => applyDiscount(discountInput.value));
         document.getElementById('clear-discount-button').addEventListener('click', () => applyDiscount(0));
         closeTicketButton.addEventListener('click', closeTicket);
+        productSearchInput.addEventListener('input', (event) => {
+            state.productSearchTerm = event.target.value || '';
+            renderProducts();
+        });
         cancelAddButton.addEventListener('click', closeAddConfirmation);
         confirmAddButton.addEventListener('click', confirmPendingAdd);
+        salesAuthForm.addEventListener('submit', authenticateSalesSession);
+        cancelSalesAuthButton.addEventListener('click', closeSalesAuthModal);
+        cancelReturnButton.addEventListener('click', closeReturnConfirmationModal);
+        confirmReturnButton.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+        acknowledgeAccessDeniedButton.addEventListener('click', closeTableAccessDeniedModal);
         addConfirmationModal.addEventListener('click', (event) => {
             if (event.target === addConfirmationModal) {
                 closeAddConfirmation();
             }
         });
+        salesAuthModal.addEventListener('click', (event) => {
+            if (event.target === salesAuthModal) {
+                closeSalesAuthModal();
+            }
+        });
+        returnConfirmationModal.addEventListener('click', (event) => {
+            if (event.target === returnConfirmationModal) {
+                closeReturnConfirmationModal();
+            }
+        });
+        tableAccessDeniedModal.addEventListener('click', (event) => {
+            if (event.target === tableAccessDeniedModal) {
+                closeTableAccessDeniedModal();
+            }
+        });
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape' && addConfirmationModal.classList.contains('visible')) {
                 closeAddConfirmation();
+            }
+            if (event.key === 'Escape' && salesAuthModal.classList.contains('visible')) {
+                closeSalesAuthModal();
+            }
+            if (event.key === 'Escape' && returnConfirmationModal.classList.contains('visible')) {
+                closeReturnConfirmationModal();
+            }
+            if (event.key === 'Escape' && tableAccessDeniedModal.classList.contains('visible')) {
+                closeTableAccessDeniedModal();
             }
         });
 
@@ -1574,6 +2317,7 @@
             refreshTables({ silent: true });
         });
 
+        syncSessionChrome();
         refreshTables();
         setInterval(() => {
             refreshTables({ silent: true });

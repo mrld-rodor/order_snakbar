@@ -5,34 +5,173 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ app_name }}</title>
     <style>
+        :root {
+            --bg: #f6efe6;
+            --panel: rgba(255, 251, 246, 0.94);
+            --text: #30251e;
+            --muted: #6f6054;
+            --accent: #92522d;
+            --accent-dark: #6f3b1c;
+            --line: rgba(146, 82, 45, 0.14);
+            --drink: #2f6760;
+            --drink-dark: #1f4844;
+        }
+        * { box-sizing: border-box; }
         body {
             margin: 0;
+            min-height: 100vh;
             font-family: "Segoe UI", sans-serif;
-            background: linear-gradient(135deg, #f7f1e8 0%, #eadbc8 100%);
-            color: #2f241f;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(146, 82, 45, 0.16), transparent 28%),
+                linear-gradient(145deg, #fbf6ef, #ead8c6);
+            display: grid;
+            place-items: center;
+            padding: 1.5rem;
         }
-        main {
-            max-width: 720px;
-            margin: 6rem auto;
+        .shell {
+            width: min(100%, 920px);
+            display: grid;
+            gap: 1.25rem;
+        }
+        .hero,
+        .options {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            box-shadow: 0 28px 70px rgba(71, 44, 29, 0.12);
+        }
+        .hero {
             padding: 2rem;
-            background: rgba(255, 252, 247, 0.92);
-            border-radius: 20px;
-            box-shadow: 0 24px 60px rgba(70, 45, 30, 0.12);
+            display: grid;
+            gap: 0.65rem;
         }
-        a {
-            color: #7a4b2f;
+        .eyebrow {
+            margin: 0;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-size: 0.82rem;
             font-weight: 700;
+        }
+        h1 {
+            margin: 0;
+            font-size: clamp(2rem, 5vw, 3.25rem);
+            line-height: 1.05;
+        }
+        .hero p {
+            margin: 0;
+            max-width: 52ch;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+        .options {
+            padding: 1.1rem;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+        .option-card {
+            display: grid;
+            gap: 0.85rem;
+            padding: 1.35rem;
+            border-radius: 24px;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 240, 232, 0.98));
+            box-shadow: 0 18px 36px rgba(71, 44, 29, 0.08);
+            transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+        }
+        .option-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 24px 44px rgba(71, 44, 29, 0.12);
+        }
+        .option-card:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(146, 82, 45, 0.12);
+        }
+        .option-card.sales {
+            border-color: rgba(47, 103, 96, 0.18);
+            background: linear-gradient(180deg, rgba(241, 249, 247, 0.98), rgba(228, 239, 236, 0.98));
+        }
+        .option-card.management {
+            border-color: rgba(146, 82, 45, 0.18);
+            background: linear-gradient(180deg, rgba(255, 246, 240, 0.98), rgba(246, 229, 217, 0.98));
+        }
+        .icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            color: white;
+        }
+        .sales .icon { background: linear-gradient(135deg, var(--drink), var(--drink-dark)); }
+        .management .icon { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); }
+        .icon svg {
+            width: 1.4rem;
+            height: 1.4rem;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .option-card h2 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+        .option-card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(48, 37, 30, 0.08);
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        @media (max-width: 720px) {
+            .options { grid-template-columns: minmax(0, 1fr); }
         }
     </style>
 </head>
 <body>
-    <main>
-        <h1>{{ app_name }}</h1>
-        <p>Base inicial do sistema integrado de gestao para cafeteria com autenticacao, catalogo e banco de dados operacional.</p>
-        <p>Endpoint de verificacao: <a href="/api/health">/api/health</a></p>
-        <p>Fluxo inicial de autenticacao: <a href="/login">/login</a></p>
-        <p>Catalogo seed do cardapio: <a href="/api/catalog/menu">/api/catalog/menu</a></p>
-        <p>Painel administrativo de produtos: <a href="/admin">/admin</a></p>
+    <main class="shell">
+        <section class="hero">
+            <p class="eyebrow">Acesso principal</p>
+            <h1>{{ app_name }}</h1>
+            <p>Escolha o fluxo de entrada. Vendas abre direto o painel principal de operacao. Gerenciamento leva para a autenticacao de administradores e chefe de seccao.</p>
+        </section>
+
+        <section class="options" aria-label="Atalhos principais">
+            <a class="option-card sales" href="/operacao">
+                <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M7 4h10l-1 7a4 4 0 0 1-4 3 4 4 0 0 1-4-3L7 4Z"></path><path d="M12 14v6"></path><path d="M9 20h6"></path></svg>
+                </div>
+                <span class="tag">Painel direto</span>
+                <h2>Vendas</h2>
+                <p>Abre direto o painel principal de vendas. A autenticacao acontece apenas quando uma mesa for selecionada.</p>
+            </a>
+
+            <a class="option-card management" href="/login">
+                <div class="icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M12 3 4 7v6c0 4.2 3.4 6.8 8 8 4.6-1.2 8-3.8 8-8V7l-8-4Z"></path><path d="M9.5 12.5 11 14l3.5-3.5"></path></svg>
+                </div>
+                <span class="tag">Acesso restrito</span>
+                <h2>Gerenciamento</h2>
+                <p>Leva para a tela de login de administradores e chefe de seccao, mantendo o restante dos paineis com o mesmo visual.</p>
+            </a>
+        </section>
     </main>
 </body>
 </html>

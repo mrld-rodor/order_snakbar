@@ -29,17 +29,17 @@ class BaseConfig:
         "on",
     }
     DEFAULT_ADMIN_NAME = os.getenv("ADMIN_NAME", "Administrador")
-    DEFAULT_ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@cafeteria.local")
+    DEFAULT_ADMIN_CONTACT = os.getenv("ADMIN_CONTACT", "") or os.getenv("ADMIN_EMAIL", "935000001")
     DEFAULT_ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123")
     DEFAULT_COLLABORATOR_NAME = os.getenv("COLLABORATOR_NAME", "Colaborador")
-    DEFAULT_COLLABORATOR_EMAIL = os.getenv(
-        "COLLABORATOR_EMAIL", "colaborador@cafeteria.local"
-    )
+    DEFAULT_COLLABORATOR_CONTACT = os.getenv(
+        "COLLABORATOR_CONTACT", ""
+    ) or os.getenv("COLLABORATOR_EMAIL", "935000002")
     DEFAULT_COLLABORATOR_PASSWORD = os.getenv(
         "COLLABORATOR_PASSWORD", "colaborador123"
     )
     DEFAULT_FLOOR_CHIEF_NAME = os.getenv("FLOOR_CHIEF_NAME", "Chefe de Sala")
-    DEFAULT_FLOOR_CHIEF_EMAIL = os.getenv("FLOOR_CHIEF_EMAIL", "chefia@cafeteria.local")
+    DEFAULT_FLOOR_CHIEF_CONTACT = os.getenv("FLOOR_CHIEF_CONTACT", "") or os.getenv("FLOOR_CHIEF_EMAIL", "935000003")
     DEFAULT_FLOOR_CHIEF_PASSWORD = os.getenv("FLOOR_CHIEF_PASSWORD", "chefia123")
 
 

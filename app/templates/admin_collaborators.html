@@ -53,6 +53,8 @@
         .metrics { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 1rem; }
         .layout { grid-template-columns: 1.2fr 1fr; }
         .management-grid { grid-template-columns: 360px 1fr; margin-bottom: 1rem; }
+        .management-grid.editor-hidden { grid-template-columns: 1fr; }
+        .management-editor-card.hidden-editor { display: none; }
         .roster { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
         .metric, .list-item, .roster-card, .credentials-box, .info-box { background: #fff; border: 1px solid var(--border); border-radius: 18px; padding: 1rem; }
         .form-grid { display: grid; gap: 0.8rem; }
@@ -157,6 +159,43 @@
             border: 1px solid var(--border); border-radius: 16px; padding: 0.85rem; background: white;
         }
         .sale-item-row strong { margin-bottom: 0.3rem; display: block; }
+        .logout-modal-overlay {
+            position: fixed; inset: 0; background: rgba(42, 32, 25, 0.38); display: none;
+            align-items: center; justify-content: center; padding: 1.2rem; z-index: 60;
+        }
+        .logout-modal-overlay.open { display: flex; }
+        .logout-modal-card {
+            width: min(440px, 100%); background: #fffaf5; border: 1px solid var(--border); border-radius: 24px;
+            padding: 1.2rem; box-shadow: 0 30px 70px rgba(42, 32, 25, 0.24);
+        }
+        .logout-modal-card h3 { margin: 0 0 0.45rem; }
+        .logout-modal-card p { margin: 0; color: var(--muted); }
+        .logout-modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.1rem; }
+        .delete-modal-overlay {
+            position: fixed; inset: 0; background: rgba(42, 32, 25, 0.38); display: none;
+            align-items: center; justify-content: center; padding: 1.2rem; z-index: 62;
+        }
+        .delete-modal-overlay.open { display: flex; }
+        .delete-modal-card {
+            width: min(460px, 100%); background: #fffaf5; border: 1px solid var(--border); border-radius: 24px;
+            padding: 1.2rem; box-shadow: 0 30px 70px rgba(42, 32, 25, 0.24);
+        }
+        .delete-modal-card h3 { margin: 0 0 0.45rem; }
+        .delete-modal-card p { margin: 0; color: var(--muted); }
+        .delete-modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.1rem; }
+        .create-modal-overlay {
+            position: fixed; inset: 0; background: rgba(42, 32, 25, 0.38); display: none;
+            align-items: center; justify-content: center; padding: 1.2rem; z-index: 61;
+        }
+        .create-modal-overlay.open { display: flex; }
+        .create-modal-card {
+            width: min(480px, 100%); background: #fffaf5; border: 1px solid var(--border); border-radius: 24px;
+            padding: 1.2rem; box-shadow: 0 30px 70px rgba(42, 32, 25, 0.24);
+        }
+        .create-modal-card h3 { margin: 0 0 0.45rem; }
+        .create-modal-card p { margin: 0; color: var(--muted); }
+        .create-modal-form { display: grid; gap: 0.8rem; margin-top: 1rem; }
+        .create-modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.4rem; }
         .empty-state { text-align: center; color: var(--muted); }
         pre { overflow: auto; padding: 1rem; border-radius: 16px; background: #2c221d; color: #f7ede1; }
         @media (max-width: 980px) {
@@ -183,28 +222,25 @@
         {% include 'admin_nav.html' %}
         {% endif %}
 
+        {% if not show_admin_nav %}
         <nav class="collaborator-nav" aria-label="Navegacao de colaboradores">
-            {% if not show_admin_nav %}
-            <a href="{{ sales_url }}">Painel de vendas</a>
-            {% endif %}
             <a href="{{ productivity_url }}" class="{% if active_collaborator_tab == 'produtividade' %}active{% endif %}">Produtividade</a>
             <a href="{{ management_url }}" class="{% if active_collaborator_tab == 'gerenciamento' %}active{% endif %}">Gerenciamento</a>
-            {% if not show_admin_nav %}
             <a href="/chefia/estoque">Estoque</a>
-            {% endif %}
         </nav>
+        {% endif %}
 
         {% if show_management %}
-        <div class="management-grid">
-            <section class="card">
+        <div id="management-grid" class="management-grid editor-hidden">
+            <section id="management-editor-card" class="card management-editor-card hidden-editor">
                 <div style="display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1rem;">
                     <div>
-                        <h2 style="margin:0;">Cadastro de equipa</h2>
-                        <p style="margin:0.3rem 0 0; color:#726256;">
+                        <h2 id="management-editor-title" style="margin:0;">Cadastro de equipa</h2>
+                        <p id="management-editor-description" style="margin:0.3rem 0 0; color:#726256;">
                             {% if show_admin_nav %}
                             Administrador cria chefia e colaboradores. A autenticacao individual alimenta as analises de produtividade e desempenho.
                             {% else %}
-                            A chefia pode adicionar colaboradores e consultar a equipa ativa. Edicao e remocao continuam restritas ao administrador.
+                            A chefia pode adicionar, editar e remover colaboradores, alem de acompanhar a equipa ativa.
                             {% endif %}
                         </p>
                     </div>
@@ -221,8 +257,8 @@
                         <input id="create-name" name="name" type="text" required>
                     </label>
                     <label>
-                        Email
-                        <input id="create-email" name="email" type="email" required>
+                        Contacto
+                        <input id="create-contact" name="contact" type="text" required>
                     </label>
                     <label>
                         Perfil
@@ -235,7 +271,7 @@
                             <option value="false">Inativo</option>
                         </select>
                     </label>
-                    <button type="submit" id="submit-collaborator-button">Gerar acesso e PIN</button>
+                    <button type="submit" id="submit-collaborator-button">Gerar numero e PIN</button>
                     <button type="button" id="cancel-edit-button" class="secondary-button hidden">Cancelar edicao</button>
                 </form>
                 <div id="create-message" class="message"></div>
@@ -243,12 +279,13 @@
                 <div id="generated-credentials" class="credentials-box" style="display:none; margin-top:1rem;"></div>
             </section>
 
-            <section class="card">
+            <section class="card management-roster-card">
                 <div style="display:flex; justify-content:space-between; gap:1rem; align-items:center; margin-bottom:1rem;">
                     <div>
                         <h2 style="margin:0;">Equipa cadastrada</h2>
-                        <p style="margin:0.3rem 0 0; color:#726256;">Lista operacional com codigos de acesso para o sistema de vendas.</p>
+                        <p style="margin:0.3rem 0 0; color:#726256;">Lista operacional com numeros de colaborador de 5 caracteres e PIN para o sistema de vendas.</p>
                     </div>
+                    <button id="open-create-collaborator-button" type="button">Novo colaborador</button>
                 </div>
                 <div id="roster" class="roster"></div>
             </section>
@@ -309,6 +346,59 @@
                 <div id="sale-toast-content"></div>
             </div>
         </div>
+
+        <div id="logout-modal-overlay" class="logout-modal-overlay" aria-hidden="true">
+            <div class="logout-modal-card" role="dialog" aria-modal="true" aria-labelledby="logout-modal-title">
+                <div class="label">Saida do gerenciamento</div>
+                <h3 id="logout-modal-title">Encerrar sessao da chefia</h3>
+                <p>Voce esta a ser deslogado do sistema de gerenciamento. Confirme para sair e voltar para a tela de escolha entre vendas e gerenciamento.</p>
+                <div class="logout-modal-actions">
+                    <button id="cancel-logout-button" type="button" class="secondary-button">Cancelar</button>
+                    <button id="confirm-logout-button" type="button">Sair</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="delete-modal-overlay" class="delete-modal-overlay" aria-hidden="true">
+            <div class="delete-modal-card" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+                <div class="label">Confirmacao de remocao</div>
+                <h3 id="delete-modal-title">Apagar colaborador</h3>
+                <p id="delete-modal-message">Confirme a remocao do colaborador selecionado.</p>
+                <div class="delete-modal-actions">
+                    <button id="cancel-delete-button" type="button" class="secondary-button">Cancelar</button>
+                    <button id="confirm-delete-button" type="button" class="danger-button">Apagar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="create-modal-overlay" class="create-modal-overlay" aria-hidden="true">
+            <div class="create-modal-card" role="dialog" aria-modal="true" aria-labelledby="create-modal-title">
+                <div class="label">Novo colaborador</div>
+                <h3 id="create-modal-title">Adicionar colaborador</h3>
+                <p>Preencha nome, contacto e o tipo de utilizador. O numero do colaborador com 5 caracteres e o PIN serao gerados automaticamente, e o cadastro sera criado como ativo.</p>
+                <form id="create-collaborator-modal-form" class="create-modal-form">
+                    <label>
+                        Nome
+                        <input id="modal-create-name" name="name" type="text" required>
+                    </label>
+                    <label>
+                        Contacto
+                        <input id="modal-create-contact" name="contact" type="text" required>
+                    </label>
+                    <label>
+                        Tipo de utilizador
+                        <select id="modal-create-role" name="role">
+                            <option value="colaborador">Colaborador</option>
+                            <option value="chefe_sala">Chefe de sala</option>
+                        </select>
+                    </label>
+                    <div class="create-modal-actions">
+                        <button id="cancel-create-collaborator-button" type="button" class="secondary-button">Cancelar</button>
+                        <button type="submit">Criar colaborador</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -327,21 +417,42 @@
         const saleToastContent = document.getElementById('sale-toast-content');
         const saleToastTitle = document.getElementById('sale-toast-title');
         const saleToastClose = document.getElementById('sale-toast-close');
+        const logoutModalOverlay = document.getElementById('logout-modal-overlay');
+        const cancelLogoutButton = document.getElementById('cancel-logout-button');
+        const confirmLogoutButton = document.getElementById('confirm-logout-button');
+        const deleteModalOverlay = document.getElementById('delete-modal-overlay');
+        const deleteModalMessage = document.getElementById('delete-modal-message');
+        const cancelDeleteButton = document.getElementById('cancel-delete-button');
+        const confirmDeleteButton = document.getElementById('confirm-delete-button');
         const toastStack = document.getElementById('toast-stack');
+        const managementWelcomeToastKey = 'management-welcome-toast-shown';
         const createForm = document.getElementById('create-collaborator-form');
         const createMessage = document.getElementById('create-message');
         const createRole = document.getElementById('create-role');
         const generatedCredentials = document.getElementById('generated-credentials');
+        const openCreateCollaboratorButton = document.getElementById('open-create-collaborator-button');
+        const createModalOverlay = document.getElementById('create-modal-overlay');
+        const createCollaboratorModalForm = document.getElementById('create-collaborator-modal-form');
+        const modalCreateName = document.getElementById('modal-create-name');
+        const modalCreateContact = document.getElementById('modal-create-contact');
+        const modalCreateRole = document.getElementById('modal-create-role');
+        const cancelCreateCollaboratorButton = document.getElementById('cancel-create-collaborator-button');
         const currentUserBox = document.getElementById('current-user-box');
         const editingCollaboratorId = document.getElementById('editing-collaborator-id');
         const createActive = document.getElementById('create-active');
         const activeWrapper = document.getElementById('active-wrapper');
         const submitCollaboratorButton = document.getElementById('submit-collaborator-button');
         const cancelEditButton = document.getElementById('cancel-edit-button');
+        const managementGrid = document.getElementById('management-grid');
+        const managementEditorCard = document.getElementById('management-editor-card');
+        const managementEditorTitle = document.getElementById('management-editor-title');
+        const managementEditorDescription = document.getElementById('management-editor-description');
         const canManageTeam = {{ 'true' if show_management else 'false' }};
         const canViewProductivity = {{ 'true' if show_productivity else 'false' }};
+        const isChiefView = {{ 'true' if not show_admin_nav else 'false' }};
         const productivityPageUrl = {{ productivity_url|tojson }};
         const initialCollaboratorId = {{ initial_collaborator_id|tojson }};
+        const defaultManagementEditorDescription = {{ ('Administrador cria chefia e colaboradores. A autenticacao individual alimenta as analises de produtividade e desempenho.' if show_admin_nav else 'A chefia pode adicionar, editar e remover colaboradores, alem de acompanhar a equipa ativa.')|tojson }};
 
         const state = {
             currentUser: null,
@@ -349,6 +460,7 @@
             editingCollaborator: null,
             recentOrders: [],
             toastTimers: new Map(),
+            pendingDeleteCollaboratorId: null,
         };
 
         async function authorizedFetch(url, options = {}) {
@@ -460,6 +572,54 @@
             });
         }
 
+        function shouldShowManagementWelcomeToast() {
+            if (!canManageTeam) {
+                return false;
+            }
+
+            return sessionStorage.getItem(managementWelcomeToastKey) !== 'true';
+        }
+
+        function markManagementWelcomeToastShown() {
+            sessionStorage.setItem(managementWelcomeToastKey, 'true');
+        }
+
+        function performLogout() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('auth_user');
+            sessionStorage.removeItem(managementWelcomeToastKey);
+            window.location.href = '/';
+        }
+
+        function openLogoutModal() {
+            logoutModalOverlay.classList.add('open');
+            logoutModalOverlay.setAttribute('aria-hidden', 'false');
+            cancelLogoutButton?.focus();
+        }
+
+        function closeLogoutModal() {
+            logoutModalOverlay.classList.remove('open');
+            logoutModalOverlay.setAttribute('aria-hidden', 'true');
+        }
+
+        function openCreateCollaboratorModal() {
+            if (!createModalOverlay || !createCollaboratorModalForm) {
+                return;
+            }
+            createCollaboratorModalForm.reset();
+            createModalOverlay.classList.add('open');
+            createModalOverlay.setAttribute('aria-hidden', 'false');
+            modalCreateName?.focus();
+        }
+
+        function closeCreateCollaboratorModal() {
+            if (!createModalOverlay) {
+                return;
+            }
+            createModalOverlay.classList.remove('open');
+            createModalOverlay.setAttribute('aria-hidden', 'true');
+        }
+
         function redirectByRole(role) {
             if (role === 'administrador' || role === 'chefe_sala') {
                 return;
@@ -476,11 +636,40 @@
                     { value: 'colaborador', label: 'Colaborador' },
                     { value: 'chefe_sala', label: 'Chefe de sala' },
                 ]
-                : [{ value: 'colaborador', label: 'Colaborador' }];
+                : state.editingCollaborator
+                    ? [
+                        { value: 'colaborador', label: 'Colaborador' },
+                        { value: 'chefe_sala', label: 'Chefe de sala' },
+                    ]
+                    : [{ value: 'colaborador', label: 'Colaborador' }];
 
             createRole.innerHTML = options
                 .map((option) => `<option value="${option.value}">${option.label}</option>`)
                 .join('');
+        }
+
+        function toggleManagementEditor(showEditor) {
+            if (!canManageTeam || !managementGrid || !managementEditorCard) {
+                return;
+            }
+
+            managementGrid.classList.toggle('editor-hidden', !showEditor);
+            managementEditorCard.classList.toggle('hidden-editor', !showEditor);
+        }
+
+        function updateManagementEditorHeader(collaborator = null) {
+            if (!managementEditorTitle || !managementEditorDescription) {
+                return;
+            }
+
+            if (collaborator) {
+                managementEditorTitle.textContent = 'Editar colaborador';
+                managementEditorDescription.textContent = `Atualize os dados de ${collaborator.name} e guarde as alteracoes quando terminar.`;
+                return;
+            }
+
+            managementEditorTitle.textContent = 'Cadastro de equipa';
+            managementEditorDescription.textContent = defaultManagementEditorDescription;
         }
 
         function resetCollaboratorForm() {
@@ -491,11 +680,13 @@
             editingCollaboratorId.value = '';
             createForm.reset();
             createActive.value = 'true';
-            submitCollaboratorButton.textContent = 'Gerar acesso e PIN';
+            submitCollaboratorButton.textContent = 'Gerar numero e PIN';
             activeWrapper.classList.add('hidden');
             cancelEditButton.classList.add('hidden');
             generatedCredentials.style.display = 'none';
             updateRoleOptions();
+            updateManagementEditorHeader(null);
+            toggleManagementEditor(false);
         }
 
         function fillCollaboratorForm(collaborator) {
@@ -503,9 +694,12 @@
                 return;
             }
             state.editingCollaborator = collaborator;
+            updateRoleOptions();
+            updateManagementEditorHeader(collaborator);
+            toggleManagementEditor(true);
             editingCollaboratorId.value = collaborator.id;
             document.getElementById('create-name').value = collaborator.name;
-            document.getElementById('create-email').value = collaborator.email;
+            document.getElementById('create-contact').value = collaborator.contact || '';
             createRole.value = collaborator.role;
             createActive.value = collaborator.active ? 'true' : 'false';
             submitCollaboratorButton.textContent = 'Atualizar colaborador';
@@ -530,7 +724,8 @@
                 <div class="label">Sessao atual</div>
                 <div class="value">${state.currentUser.name}</div>
                 <div style="margin-top:0.4rem;">Perfil: ${state.currentUser.role}</div>
-                <div>Codigo de acesso: ${state.currentUser.access_code || 'Nao aplicavel'}</div>
+                <div>Contacto: ${state.currentUser.contact || 'Nao informado'}</div>
+                <div>Numero do colaborador: ${state.currentUser.access_code || 'Nao aplicavel'}</div>
             `;
         }
 
@@ -586,15 +781,15 @@
                 node.className = 'roster-card';
                 node.innerHTML = `
                     <strong>${item.name}</strong>
-                    <div style="margin-top:0.45rem;">${item.email}</div>
+                    <div style="margin-top:0.45rem;">${item.contact || 'Sem contacto'}</div>
                     <div class="chips">
                         <span class="chip">${item.role}</span>
-                        <span class="chip">Codigo ${item.access_code || 'N/D'}</span>
+                        <span class="chip">Numero ${item.access_code || 'N/D'}</span>
                         <span class="chip">${item.active ? 'Ativo' : 'Inativo'}</span>
                     </div>
                     <div class="roster-actions">
                         <button type="button" class="secondary-button" data-action="view" data-id="${item.id}">Ver painel</button>
-                        ${state.currentUser?.role === 'administrador' ? `
+                        ${canManageTeam ? `
                             <button type="button" class="secondary-button" data-action="edit" data-id="${item.id}">Editar</button>
                             <button type="button" class="danger-button" data-action="delete" data-id="${item.id}">Apagar</button>
                         ` : ''}
@@ -760,7 +955,7 @@
                             </div>
                             <div class="chips">
                                 <span class="chip">${escapeHtml(profile.collaborator.role)}</span>
-                                <span class="chip">Codigo ${escapeHtml(profile.collaborator.access_code || 'N/D')}</span>
+                                <span class="chip">Numero ${escapeHtml(profile.collaborator.access_code || 'N/D')}</span>
                                 <span class="chip">${profile.collaborator.active ? 'Ativo' : 'Inativo'}</span>
                             </div>
                         </div>
@@ -908,6 +1103,26 @@
             saleToastOverlay.setAttribute('aria-hidden', 'true');
         }
 
+        function openDeleteModal(collaborator) {
+            if (!deleteModalOverlay || !deleteModalMessage) {
+                return;
+            }
+            state.pendingDeleteCollaboratorId = collaborator.id;
+            deleteModalMessage.textContent = `Deseja realmente apagar ${collaborator.name}? Se houver historico operacional, o cadastro sera desativado em vez de removido.`;
+            deleteModalOverlay.classList.add('open');
+            deleteModalOverlay.setAttribute('aria-hidden', 'false');
+            cancelDeleteButton?.focus();
+        }
+
+        function closeDeleteModal() {
+            state.pendingDeleteCollaboratorId = null;
+            if (!deleteModalOverlay) {
+                return;
+            }
+            deleteModalOverlay.classList.remove('open');
+            deleteModalOverlay.setAttribute('aria-hidden', 'true');
+        }
+
         async function loadCurrentUser() {
             const response = await authorizedFetch('/api/auth/me');
             const data = await response.json();
@@ -915,12 +1130,15 @@
             redirectByRole(state.currentUser.role);
             renderCurrentUser();
             updateRoleOptions();
-            showToast({
-                title: 'Painel pronto',
-                message: `Sessao de ${state.currentUser.name} carregada com sucesso.`,
-                type: 'info',
-                duration: 2600,
-            });
+            if (shouldShowManagementWelcomeToast()) {
+                showToast({
+                    title: 'Painel pronto',
+                    message: `Sessao de ${state.currentUser.name} carregada com sucesso.`,
+                    type: 'info',
+                    duration: 2600,
+                });
+                markManagementWelcomeToastShown();
+            }
         }
 
         async function loadManagedCollaborators() {
@@ -1004,7 +1222,7 @@
 
                 const payload = {
                     name: document.getElementById('create-name').value,
-                    email: document.getElementById('create-email').value,
+                    contact: document.getElementById('create-contact').value,
                     role: createRole.value,
                 };
 
@@ -1038,13 +1256,54 @@
                         message: 'Acesso inicial criado e pronto para uso.',
                         type: 'success',
                         chips: [
-                            `Codigo ${data.credentials.access_code}`,
+                            `Numero ${data.credentials.access_code}`,
                             `PIN ${data.credentials.pin}`,
                         ],
                         duration: 9000,
                     });
                 }
 
+                await Promise.all([loadManagedCollaborators(), loadCollaborators(), loadDashboard()]);
+            });
+        }
+
+        if (createCollaboratorModalForm) {
+            createCollaboratorModalForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const payload = {
+                    name: modalCreateName.value,
+                    contact: modalCreateContact.value,
+                    role: modalCreateRole.value,
+                };
+
+                const response = await authorizedFetch('/api/management/collaborators', {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    const error = data.errors ? Object.values(data.errors)[0] : data.message;
+                    showToast({
+                        title: 'Falha na criacao',
+                        message: error || 'Falha ao cadastrar colaborador.',
+                        type: 'error',
+                    });
+                    return;
+                }
+
+                closeCreateCollaboratorModal();
+                showToast({
+                    title: `Credenciais de ${data.collaborator.name}`,
+                    message: 'Acesso inicial criado e pronto para uso.',
+                    type: 'success',
+                    chips: [
+                        `Numero ${data.credentials.access_code}`,
+                        `PIN ${data.credentials.pin}`,
+                    ],
+                    duration: 9000,
+                });
                 await Promise.all([loadManagedCollaborators(), loadCollaborators(), loadDashboard()]);
             });
         }
@@ -1079,7 +1338,7 @@
                     return;
                 }
 
-                if (state.currentUser?.role !== 'administrador') {
+                if (!canManageTeam) {
                     return;
                 }
 
@@ -1095,28 +1354,7 @@
                 }
 
                 if (button.dataset.action === 'delete') {
-                    const confirmed = window.confirm(`Deseja realmente apagar ${collaborator.name}?`);
-                    if (!confirmed) {
-                        return;
-                    }
-
-                    const response = await authorizedFetch(`/api/management/collaborators/${collaboratorId}`, {
-                        method: 'DELETE',
-                    });
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        const error = data.errors ? Object.values(data.errors)[0] : data.message;
-                        setCreateMessage(error || 'Falha ao apagar colaborador.', 'error');
-                        return;
-                    }
-
-                    if (state.editingCollaborator?.id === collaboratorId) {
-                        resetCollaboratorForm();
-                    }
-
-                    setCreateMessage(data.message, 'success');
-                    await Promise.all([loadManagedCollaborators(), loadCollaborators(), loadDashboard()]);
+                    openDeleteModal(collaborator);
                 }
             });
         }
@@ -1152,7 +1390,32 @@
             if (canViewProductivity && saleToastOverlay && event.key === 'Escape' && saleToastOverlay.classList.contains('open')) {
                 closeSaleToast();
             }
+            if (logoutModalOverlay && event.key === 'Escape' && logoutModalOverlay.classList.contains('open')) {
+                closeLogoutModal();
+            }
+            if (deleteModalOverlay && event.key === 'Escape' && deleteModalOverlay.classList.contains('open')) {
+                closeDeleteModal();
+            }
+            if (createModalOverlay && event.key === 'Escape' && createModalOverlay.classList.contains('open')) {
+                closeCreateCollaboratorModal();
+            }
         });
+
+        if (openCreateCollaboratorButton) {
+            openCreateCollaboratorButton.addEventListener('click', openCreateCollaboratorModal);
+        }
+
+        if (cancelCreateCollaboratorButton) {
+            cancelCreateCollaboratorButton.addEventListener('click', closeCreateCollaboratorModal);
+        }
+
+        if (createModalOverlay) {
+            createModalOverlay.addEventListener('click', (event) => {
+                if (event.target === createModalOverlay) {
+                    closeCreateCollaboratorModal();
+                }
+            });
+        }
 
         if (cancelEditButton) {
             cancelEditButton.addEventListener('click', () => {
@@ -1168,15 +1431,69 @@
         }
 
         document.getElementById('logout-button').addEventListener('click', () => {
-            localStorage.removeItem('access_token');
-            localStorage.removeItem('auth_user');
-            window.location.href = '/login';
+            if (isChiefView) {
+                openLogoutModal();
+                return;
+            }
+            performLogout();
         });
-        if (periodSelect) {
-            periodSelect.addEventListener('change', loadDashboard);
+
+        if (cancelLogoutButton) {
+            cancelLogoutButton.addEventListener('click', closeLogoutModal);
         }
-        if (collaboratorSelect) {
-            collaboratorSelect.addEventListener('change', loadDashboard);
+
+        if (confirmLogoutButton) {
+            confirmLogoutButton.addEventListener('click', performLogout);
+        }
+
+        if (cancelDeleteButton) {
+            cancelDeleteButton.addEventListener('click', closeDeleteModal);
+        }
+
+        if (confirmDeleteButton) {
+            confirmDeleteButton.addEventListener('click', async () => {
+                const collaboratorId = state.pendingDeleteCollaboratorId;
+                if (!collaboratorId) {
+                    closeDeleteModal();
+                    return;
+                }
+
+                const response = await authorizedFetch(`/api/management/collaborators/${collaboratorId}`, {
+                    method: 'DELETE',
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    const error = data.errors ? Object.values(data.errors)[0] : data.message;
+                    setCreateMessage(error || 'Falha ao apagar colaborador.', 'error');
+                    closeDeleteModal();
+                    return;
+                }
+
+                if (state.editingCollaborator?.id === collaboratorId) {
+                    resetCollaboratorForm();
+                }
+
+                closeDeleteModal();
+                setCreateMessage(data.message, 'success');
+                await Promise.all([loadManagedCollaborators(), loadCollaborators(), loadDashboard()]);
+            });
+        }
+
+        if (logoutModalOverlay) {
+            logoutModalOverlay.addEventListener('click', (event) => {
+                if (event.target === logoutModalOverlay) {
+                    closeLogoutModal();
+                }
+            });
+        }
+
+        if (deleteModalOverlay) {
+            deleteModalOverlay.addEventListener('click', (event) => {
+                if (event.target === deleteModalOverlay) {
+                    closeDeleteModal();
+                }
+            });
         }
 
         Promise.all([

@@ -28,6 +28,14 @@ class Collaborator(db.Model):
     orders = db.relationship("Order", back_populates="collaborator", lazy=True)
     payments = db.relationship("Payment", back_populates="processed_by", lazy=True)
 
+    @property
+    def contact(self):
+        return self.email
+
+    @contact.setter
+    def contact(self, value):
+        self.email = value
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -48,7 +56,8 @@ class Collaborator(db.Model):
         payload = {
             "id": self.id,
             "name": self.name,
-            "email": self.email,
+            "contact": self.contact,
+            "email": self.contact,
             "access_code": self.access_code,
             "role": self.role,
             "active": self.active,
@@ -204,7 +213,7 @@ class Order(db.Model):
             "collaborator": self.collaborator.name if self.collaborator else None,
             "owner": owner_payload,
             "sale_credentials": {
-                "username": self.collaborator.access_code if self.collaborator and self.collaborator.access_code else (self.collaborator.email if self.collaborator else None),
+                "username": self.collaborator.access_code if self.collaborator and self.collaborator.access_code else (self.collaborator.contact if self.collaborator else None),
                 "password": self.sale_pin_code,
             },
             "status": self.status,

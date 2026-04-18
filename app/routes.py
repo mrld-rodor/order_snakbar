@@ -32,6 +32,7 @@ from app.collaborator_ordering import (
     apply_discount_to_ticket,
     close_table_ticket,
     get_collaborator_ordering_bootstrap,
+    get_public_ordering_bootstrap,
     get_table_ticket,
     remove_ticket_item,
     update_ticket_item_quantity,
@@ -70,27 +71,17 @@ def operations_page():
 
 @main_blueprint.get("/chefia/vendas")
 def floor_chief_sales_page():
-    return render_template(
-        "collaborator_panel.html",
-        app_name=current_app.config["APP_NAME"],
-        page_title="Painel de Vendas da Chefia",
-        page_description="Painel operacional da chefia: acompanhe mesas abertas, altere qualquer venda ativa e feche qualquer conta quando necessario.",
-    )
+    return redirect(url_for("main.operations_page"))
 
 
 @main_blueprint.get("/admin")
 def admin_page():
-    return redirect(url_for("main.admin_products_dashboard_page"))
+    return redirect(url_for("main.admin_collaborators_management_page"))
 
 
 @main_blueprint.get("/admin/produtos")
 def admin_products_dashboard_page():
-    return render_template(
-        "admin_sales.html",
-        app_name=current_app.config["APP_NAME"],
-        page_title="Painel de Produtos e Vendas",
-        active_admin_tab="produtos",
-    )
+    return redirect(url_for("main.admin_catalog_page"))
 
 
 @main_blueprint.get("/admin/colaboradores")
@@ -107,7 +98,7 @@ def admin_collaborators_page():
         sales_url=url_for("main.operations_page"),
         active_collaborator_tab="produtividade",
         initial_collaborator_id=request.args.get("collaborator_id", type=int),
-        active_admin_tab="colaboradores",
+        active_admin_tab="produtividade",
     )
 
 
@@ -125,7 +116,7 @@ def admin_collaborators_management_page():
         sales_url=url_for("main.operations_page"),
         active_collaborator_tab="gerenciamento",
         initial_collaborator_id=None,
-        active_admin_tab="colaboradores",
+        active_admin_tab="gerenciamento",
     )
 
 
@@ -189,16 +180,17 @@ def admin_catalog_page():
         "admin_products.html",
         app_name=current_app.config["APP_NAME"],
         expected_role="administrador",
-        page_title="Painel de Catalogo",
+        page_title="Painel de Estoque e Catalogo",
         api_endpoint="/api/admin/area",
-        active_admin_tab="catalogo",
+        show_admin_nav=True,
+        active_admin_tab="estoque",
     )
 
 
 @main_blueprint.post("/api/auth/login")
 def login():
     payload = request.get_json(silent=True) or {}
-    identifier = (payload.get("identifier") or payload.get("email") or "").strip()
+    identifier = (payload.get("identifier") or payload.get("contact") or payload.get("email") or "").strip()
     secret = payload.get("secret") or payload.get("password") or ""
 
     if not identifier or not secret:
@@ -211,7 +203,7 @@ def login():
     token = create_access_token(
         identity=str(user["id"]),
         additional_claims={
-            "email": user["email"],
+            "contact": user.get("contact"),
             "name": user["name"],
             "role": user["role"],
         },
@@ -250,6 +242,11 @@ def collaborator_ordering_bootstrap():
     if collaborator is None:
         return jsonify({"message": "Usuario autenticado nao encontrado."}), 404
     return jsonify(get_collaborator_ordering_bootstrap(collaborator))
+
+
+@main_blueprint.get("/api/operacao/bootstrap-public")
+def public_ordering_bootstrap():
+    return jsonify(get_public_ordering_bootstrap())
 
 
 @main_blueprint.get("/api/colaborador/tables/<int:table_id>/ticket")
@@ -542,7 +539,7 @@ def management_create_collaborator():
 
 
 @main_blueprint.put("/api/management/collaborators/<int:collaborator_id>")
-@role_required("administrador")
+@role_required("administrador", "chefe_sala")
 def management_update_collaborator(collaborator_id):
     collaborator = get_current_collaborator()
     if collaborator is None:
@@ -566,7 +563,7 @@ def management_update_collaborator(collaborator_id):
 
 
 @main_blueprint.delete("/api/management/collaborators/<int:collaborator_id>")
-@role_required("administrador")
+@role_required("administrador", "chefe_sala")
 def management_delete_collaborator(collaborator_id):
     collaborator = get_current_collaborator()
     if collaborator is None:

@@ -142,8 +142,8 @@
                     <div id="user-name" class="value">Carregando...</div>
                 </div>
                 <div class="metric">
-                    <div class="label">Email</div>
-                    <div id="user-email" class="value">Carregando...</div>
+                    <div class="label">Contacto</div>
+                    <div id="user-contact" class="value">Carregando...</div>
                 </div>
                 <div class="metric">
                     <div class="label">Perfil</div>
@@ -310,7 +310,7 @@
             }
 
             document.getElementById('user-name').textContent = user.name;
-            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('user-contact').textContent = user.contact || 'Nao informado';
             document.getElementById('user-role').textContent = user.role;
 
             const areaResponse = await fetch(protectedEndpoint, {

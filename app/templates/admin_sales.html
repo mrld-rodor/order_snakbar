@@ -428,7 +428,7 @@
                 <strong>Mesa ${item.table_number} | Pedido #${item.id}</strong>
                 <div>Responsavel: ${item.collaborator || 'Nao atribuido'}</div>
                 <div>Utilizador da venda: ${item.sale_credentials?.username || '-'}</div>
-                <div>Senha temporaria: ${item.sale_credentials?.password || '-'}</div>
+                <div>PIN temporario: ${item.sale_credentials?.password || '-'}</div>
                 <div>Total parcial: ${currency(item.total)}</div>
                 <div>Status: ${item.status}</div>
             `, 'Nenhuma mesa aberta neste momento.');

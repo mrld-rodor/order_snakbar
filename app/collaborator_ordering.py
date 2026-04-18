@@ -114,6 +114,16 @@ def get_collaborator_ordering_bootstrap(collaborator):
     }
 
 
+def get_public_ordering_bootstrap():
+    tables = DiningTable.query.filter_by(active=True).order_by(DiningTable.number.asc()).all()
+    return {
+        "user": None,
+        "floor_chief": _active_floor_chief_payload(),
+        "categories": _active_categories_with_products(),
+        "tables": [_table_status_payload(table) for table in tables],
+    }
+
+
 def get_table_ticket(table_id, collaborator):
     table = DiningTable.query.filter_by(id=table_id, active=True).first_or_404()
     ticket = _current_open_order_for_table(table.id)

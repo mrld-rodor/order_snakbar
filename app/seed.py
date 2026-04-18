@@ -182,25 +182,25 @@ MENU_PRODUCTS = [
 DEMO_COLLABORATORS = [
     {
         "name": "Rita Fonseca",
-        "email": "rita.fonseca@cafeteria.local",
+        "contact": "935100001",
         "password": "chefia123",
         "role": "chefe_sala",
     },
     {
         "name": "Ana Costa",
-        "email": "ana.costa@cafeteria.local",
+        "contact": "935100002",
         "password": "colaborador123",
         "role": "colaborador",
     },
     {
         "name": "Bruno Lima",
-        "email": "bruno.lima@cafeteria.local",
+        "contact": "935100003",
         "password": "colaborador123",
         "role": "colaborador",
     },
     {
         "name": "Carla Dias",
-        "email": "carla.dias@cafeteria.local",
+        "contact": "935100004",
         "password": "colaborador123",
         "role": "colaborador",
     },
@@ -223,19 +223,19 @@ def _ensure_collaborators(config):
     seed_users = [
         {
             "name": config["DEFAULT_ADMIN_NAME"],
-            "email": config["DEFAULT_ADMIN_EMAIL"],
+            "contact": config["DEFAULT_ADMIN_CONTACT"],
             "password": config["DEFAULT_ADMIN_PASSWORD"],
             "role": "administrador",
         },
         {
             "name": config["DEFAULT_COLLABORATOR_NAME"],
-            "email": config["DEFAULT_COLLABORATOR_EMAIL"],
+            "contact": config["DEFAULT_COLLABORATOR_CONTACT"],
             "password": config["DEFAULT_COLLABORATOR_PASSWORD"],
             "role": "colaborador",
         },
         {
             "name": config["DEFAULT_FLOOR_CHIEF_NAME"],
-            "email": config["DEFAULT_FLOOR_CHIEF_EMAIL"],
+            "contact": config["DEFAULT_FLOOR_CHIEF_CONTACT"],
             "password": config["DEFAULT_FLOOR_CHIEF_PASSWORD"],
             "role": "chefe_sala",
         },
@@ -243,18 +243,18 @@ def _ensure_collaborators(config):
     ]
 
     for item in seed_users:
-        collaborator = Collaborator.query.filter_by(email=item["email"].lower()).first()
+        collaborator = Collaborator.query.filter_by(email=item["contact"].lower()).first()
         if collaborator is None:
             collaborator = Collaborator(
                 name=item["name"],
-                email=item["email"].lower(),
+                contact=item["contact"].lower(),
                 role=item["role"],
                 active=True,
             )
             collaborator.set_password(item["password"])
             db.session.add(collaborator)
         else:
-            if collaborator.role != item["role"] and collaborator.email == item["email"].lower():
+            if collaborator.role != item["role"] and collaborator.contact == item["contact"].lower():
                 collaborator.role = item["role"]
             collaborator.name = item["name"]
             collaborator.active = True
@@ -298,70 +298,70 @@ def _ensure_tables():
 
 def _seed_orders():
     now = datetime.now(timezone.utc)
-    collaborators = {item.email: item for item in Collaborator.query.all() if item.role == "colaborador"}
+    collaborators = {item.contact: item for item in Collaborator.query.all() if item.role == "colaborador"}
     products = {item.slug: item for item in MenuProduct.query.all()}
     tables = {item.number: item for item in DiningTable.query.all()}
 
     dataset = [
         {
             "table": 1,
-            "collaborator": "colaborador@cafeteria.local",
+            "collaborator": "935000002",
             "paid_at": now - timedelta(hours=1, minutes=15),
             "items": [("espresso-classico", 2), ("croissant-misto", 1)],
             "method": "cartao",
         },
         {
             "table": 2,
-            "collaborator": "ana.costa@cafeteria.local",
+            "collaborator": "935100002",
             "paid_at": now - timedelta(hours=2, minutes=40),
             "items": [("latte-baunilha", 1), ("wrap-falafel", 1), ("iced-tea-limao", 1)],
             "method": "pix",
         },
         {
             "table": 3,
-            "collaborator": "bruno.lima@cafeteria.local",
+            "collaborator": "935100003",
             "paid_at": now - timedelta(hours=4, minutes=5),
             "items": [("mocha-gelado", 2), ("cheesecake-frutos-vermelhos", 2)],
             "method": "dinheiro",
         },
         {
             "table": 4,
-            "collaborator": "carla.dias@cafeteria.local",
+            "collaborator": "935100004",
             "paid_at": now - timedelta(days=2, hours=1),
             "items": [("sumo-verde-detox", 1), ("bowl-grao-abacate", 1)],
             "method": "pix",
         },
         {
             "table": 5,
-            "collaborator": "colaborador@cafeteria.local",
+            "collaborator": "935000002",
             "paid_at": now - timedelta(days=3, hours=3),
             "items": [("cappuccino-cremoso", 2), ("tosta-frango", 1)],
             "method": "cartao",
         },
         {
             "table": 6,
-            "collaborator": "ana.costa@cafeteria.local",
+            "collaborator": "935100002",
             "paid_at": now - timedelta(days=6, hours=2),
             "items": [("sumo-laranja", 2), ("croissant-misto", 2)],
             "method": "cartao",
         },
         {
             "table": 7,
-            "collaborator": "bruno.lima@cafeteria.local",
+            "collaborator": "935100003",
             "paid_at": now - timedelta(days=10, hours=5),
             "items": [("iced-tea-pessego", 2), ("cheesecake-frutos-vermelhos", 1)],
             "method": "pix",
         },
         {
             "table": 8,
-            "collaborator": "carla.dias@cafeteria.local",
+            "collaborator": "935100004",
             "paid_at": now - timedelta(days=15, hours=4),
             "items": [("espresso-classico", 1), ("tosta-frango", 1), ("cheesecake-frutos-vermelhos", 1)],
             "method": "dinheiro",
         },
         {
             "table": 9,
-            "collaborator": "colaborador@cafeteria.local",
+            "collaborator": "935000002",
             "paid_at": now - timedelta(days=23, hours=2),
             "items": [("wrap-falafel", 2), ("sumo-verde-detox", 1)],
             "method": "pix",
@@ -408,7 +408,7 @@ def _seed_orders():
 
     open_order = Order(
         table=tables[10],
-        collaborator=collaborators["ana.costa@cafeteria.local"],
+        collaborator=collaborators["935100002"],
         status="aberto",
         notes="Pedido ainda em atendimento.",
         opened_at=now - timedelta(minutes=12),

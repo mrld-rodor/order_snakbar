@@ -12,6 +12,10 @@ def normalize_access_code(value):
     return "".join(character for character in (value or "").upper() if character.isalnum())
 
 
+def normalize_contact(value):
+    return (value or "").strip().lower()
+
+
 def generate_unique_access_code():
     for _ in range(200):
         candidate = "".join(random.choices(string.ascii_uppercase, k=3)) + "".join(
@@ -57,27 +61,27 @@ def _can_assign_role(actor, target_role):
     if actor.role == "administrador":
         return target_role in MANAGEABLE_ROLES
     if actor.role == "chefe_sala":
-        return target_role == "colaborador"
+        return target_role in MANAGEABLE_ROLES
     return False
 
 
 def create_collaborator_account(actor, payload):
     name = (payload.get("name") or "").strip()
-    email = (payload.get("email") or "").strip().lower()
+    contact = normalize_contact(payload.get("contact") or payload.get("email"))
     role = (payload.get("role") or "colaborador").strip().lower()
     errors = {}
 
     if not name:
         errors["name"] = "Informe o nome do colaborador."
-    if not email:
-        errors["email"] = "Informe o email do colaborador."
+    if not contact:
+        errors["contact"] = "Informe o contacto do colaborador."
     if role not in MANAGEABLE_ROLES:
         errors["role"] = "Perfil invalido para cadastro."
     elif not _can_assign_role(actor, role):
         errors["role"] = "Voce nao tem permissao para cadastrar este perfil."
 
-    if email and Collaborator.query.filter_by(email=email).first() is not None:
-        errors["email"] = "Ja existe um colaborador com este email."
+    if contact and Collaborator.query.filter_by(email=contact).first() is not None:
+        errors["contact"] = "Ja existe um colaborador com este contacto."
 
     if errors:
         return None, None, errors
@@ -87,7 +91,7 @@ def create_collaborator_account(actor, payload):
 
     collaborator = Collaborator(
         name=name,
-        email=email,
+        contact=contact,
         role=role,
         active=True,
         access_code=access_code,
@@ -102,35 +106,37 @@ def create_collaborator_account(actor, payload):
 
 
 def update_collaborator_account(actor, collaborator_id, payload):
-    if actor is None or actor.role != "administrador":
-        return None, None, {"permission": "Apenas o administrador pode editar colaboradores."}
+    if actor is None or actor.role not in {"administrador", "chefe_sala"}:
+        return None, None, {"permission": "Apenas administrador e chefia podem editar colaboradores."}
 
     collaborator = Collaborator.query.get(collaborator_id)
     if collaborator is None:
         return None, None, {"collaborator": "Colaborador nao encontrado."}
 
     name = (payload.get("name") or "").strip()
-    email = (payload.get("email") or "").strip().lower()
+    contact = normalize_contact(payload.get("contact") or payload.get("email"))
     role = (payload.get("role") or collaborator.role).strip().lower()
     active = payload.get("active")
     errors = {}
 
     if not name:
         errors["name"] = "Informe o nome do colaborador."
-    if not email:
-        errors["email"] = "Informe o email do colaborador."
+    if not contact:
+        errors["contact"] = "Informe o contacto do colaborador."
     if role not in MANAGEABLE_ROLES:
         errors["role"] = "Perfil invalido para edicao."
+    elif not _can_assign_role(actor, role):
+        errors["role"] = "Voce nao tem permissao para atribuir este perfil."
 
-    existing = Collaborator.query.filter_by(email=email).first() if email else None
+    existing = Collaborator.query.filter_by(email=contact).first() if contact else None
     if existing is not None and existing.id != collaborator.id:
-        errors["email"] = "Ja existe um colaborador com este email."
+        errors["contact"] = "Ja existe um colaborador com este contacto."
 
     if errors:
         return None, None, errors
 
     collaborator.name = name
-    collaborator.email = email
+    collaborator.contact = contact
     collaborator.role = role
     if active is not None:
         collaborator.active = bool(active)
@@ -145,14 +151,14 @@ def update_collaborator_account(actor, collaborator_id, payload):
 
 
 def delete_collaborator_account(actor, collaborator_id):
-    if actor is None or actor.role != "administrador":
-        return None, {"permission": "Apenas o administrador pode apagar colaboradores."}
+    if actor is None or actor.role not in {"administrador", "chefe_sala"}:
+        return None, {"permission": "Apenas administrador e chefia podem apagar colaboradores."}
 
     collaborator = Collaborator.query.get(collaborator_id)
     if collaborator is None:
         return None, {"collaborator": "Colaborador nao encontrado."}
     if actor.id == collaborator.id:
-        return None, {"collaborator": "O administrador nao pode apagar a propria conta."}
+        return None, {"collaborator": "Nao e permitido apagar a propria conta por esta tela."}
 
     if collaborator.orders or collaborator.payments:
         collaborator.active = False

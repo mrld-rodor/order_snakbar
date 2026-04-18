@@ -1,9 +1,10 @@
+import re
 from functools import wraps
 
 from flask import current_app, jsonify
 from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
-from app.collaborator_management import normalize_access_code
+from app.collaborator_management import normalize_access_code, normalize_contact
 from app.models import Collaborator
 
 
@@ -14,12 +15,13 @@ def authenticate_user(identifier, secret):
         return None
 
     user = None
-    if "@" in identifier:
-        user = Collaborator.query.filter_by(email=identifier.lower(), active=True).first()
-    else:
+    access_code_candidate = normalize_access_code(identifier)
+    if re.fullmatch(r"[A-Z]{3}\d{2}", access_code_candidate or ""):
         access_code = normalize_access_code(identifier)
         if access_code:
             user = Collaborator.query.filter_by(access_code=access_code, active=True).first()
+    else:
+        user = Collaborator.query.filter_by(email=normalize_contact(identifier), active=True).first()
 
     if user is None:
         return None
